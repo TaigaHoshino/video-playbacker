@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:video_playbacker/models/app_bloc.dart';
+import 'package:video_playbacker/blocs/app_bloc.dart';
 
 import 'bloc_provider.dart';
 
