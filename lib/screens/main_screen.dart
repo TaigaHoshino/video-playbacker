@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_playbacker/blocs/bloc_provider.dart';
 import 'package:video_playbacker/screens/capture_screen.dart';
 import 'package:video_playbacker/screens/videolist_screen.dart';
 
@@ -22,6 +23,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final appModel = BlocProvider.of(context)!.bloc;
+
+    appModel.dispose();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('BottomNavigationBar'),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/bloc_holder.dart';
+import 'blocs/bloc_holder.dart';
 import 'screens/main_screen.dart';
 
 void main() {

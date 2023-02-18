@@ -18,21 +18,21 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$LoadingState<T> {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(T? content) loading,
+    required TResult Function(T? content, int? progress) loading,
     required TResult Function(T content) completed,
     required TResult Function(Exception exception) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(T? content)? loading,
+    TResult? Function(T? content, int? progress)? loading,
     TResult? Function(T content)? completed,
     TResult? Function(Exception exception)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(T? content)? loading,
+    TResult Function(T? content, int? progress)? loading,
     TResult Function(T content)? completed,
     TResult Function(Exception exception)? error,
     required TResult orElse(),
@@ -86,7 +86,7 @@ abstract class _$$_LoadingCopyWith<T, $Res> {
           _$_Loading<T> value, $Res Function(_$_Loading<T>) then) =
       __$$_LoadingCopyWithImpl<T, $Res>;
   @useResult
-  $Res call({T? content});
+  $Res call({T? content, int? progress});
 }
 
 /// @nodoc
@@ -101,12 +101,17 @@ class __$$_LoadingCopyWithImpl<T, $Res>
   @override
   $Res call({
     Object? content = freezed,
+    Object? progress = freezed,
   }) {
     return _then(_$_Loading<T>(
       freezed == content
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
               as T?,
+      freezed == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -114,14 +119,16 @@ class __$$_LoadingCopyWithImpl<T, $Res>
 /// @nodoc
 
 class _$_Loading<T> with DiagnosticableTreeMixin implements _Loading<T> {
-  const _$_Loading(this.content);
+  const _$_Loading(this.content, this.progress);
 
   @override
   final T? content;
+  @override
+  final int? progress;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'LoadingState<$T>.loading(content: $content)';
+    return 'LoadingState<$T>.loading(content: $content, progress: $progress)';
   }
 
   @override
@@ -129,7 +136,8 @@ class _$_Loading<T> with DiagnosticableTreeMixin implements _Loading<T> {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'LoadingState<$T>.loading'))
-      ..add(DiagnosticsProperty('content', content));
+      ..add(DiagnosticsProperty('content', content))
+      ..add(DiagnosticsProperty('progress', progress));
   }
 
   @override
@@ -137,12 +145,14 @@ class _$_Loading<T> with DiagnosticableTreeMixin implements _Loading<T> {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Loading<T> &&
-            const DeepCollectionEquality().equals(other.content, content));
+            const DeepCollectionEquality().equals(other.content, content) &&
+            (identical(other.progress, progress) ||
+                other.progress == progress));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(content));
+  int get hashCode => Object.hash(
+      runtimeType, const DeepCollectionEquality().hash(content), progress);
 
   @JsonKey(ignore: true)
   @override
@@ -153,33 +163,33 @@ class _$_Loading<T> with DiagnosticableTreeMixin implements _Loading<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(T? content) loading,
+    required TResult Function(T? content, int? progress) loading,
     required TResult Function(T content) completed,
     required TResult Function(Exception exception) error,
   }) {
-    return loading(content);
+    return loading(content, progress);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(T? content)? loading,
+    TResult? Function(T? content, int? progress)? loading,
     TResult? Function(T content)? completed,
     TResult? Function(Exception exception)? error,
   }) {
-    return loading?.call(content);
+    return loading?.call(content, progress);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(T? content)? loading,
+    TResult Function(T? content, int? progress)? loading,
     TResult Function(T content)? completed,
     TResult Function(Exception exception)? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
-      return loading(content);
+      return loading(content, progress);
     }
     return orElse();
   }
@@ -220,9 +230,10 @@ class _$_Loading<T> with DiagnosticableTreeMixin implements _Loading<T> {
 }
 
 abstract class _Loading<T> implements LoadingState<T> {
-  const factory _Loading(final T? content) = _$_Loading<T>;
+  const factory _Loading(final T? content, final int? progress) = _$_Loading<T>;
 
   T? get content;
+  int? get progress;
   @JsonKey(ignore: true)
   _$$_LoadingCopyWith<T, _$_Loading<T>> get copyWith =>
       throw _privateConstructorUsedError;
@@ -301,7 +312,7 @@ class _$_Completed<T> with DiagnosticableTreeMixin implements _Completed<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(T? content) loading,
+    required TResult Function(T? content, int? progress) loading,
     required TResult Function(T content) completed,
     required TResult Function(Exception exception) error,
   }) {
@@ -311,7 +322,7 @@ class _$_Completed<T> with DiagnosticableTreeMixin implements _Completed<T> {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(T? content)? loading,
+    TResult? Function(T? content, int? progress)? loading,
     TResult? Function(T content)? completed,
     TResult? Function(Exception exception)? error,
   }) {
@@ -321,7 +332,7 @@ class _$_Completed<T> with DiagnosticableTreeMixin implements _Completed<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(T? content)? loading,
+    TResult Function(T? content, int? progress)? loading,
     TResult Function(T content)? completed,
     TResult Function(Exception exception)? error,
     required TResult orElse(),
@@ -448,7 +459,7 @@ class _$_Error<T> with DiagnosticableTreeMixin implements _Error<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(T? content) loading,
+    required TResult Function(T? content, int? progress) loading,
     required TResult Function(T content) completed,
     required TResult Function(Exception exception) error,
   }) {
@@ -458,7 +469,7 @@ class _$_Error<T> with DiagnosticableTreeMixin implements _Error<T> {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(T? content)? loading,
+    TResult? Function(T? content, int? progress)? loading,
     TResult? Function(T content)? completed,
     TResult? Function(Exception exception)? error,
   }) {
@@ -468,7 +479,7 @@ class _$_Error<T> with DiagnosticableTreeMixin implements _Error<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(T? content)? loading,
+    TResult Function(T? content, int? progress)? loading,
     TResult Function(T content)? completed,
     TResult Function(Exception exception)? error,
     required TResult orElse(),
