@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 import 'package:video_playbacker/dtos/loading_state.dart';
 
@@ -8,23 +9,26 @@ import '../repositories/video_repository.dart';
 class AppBloc{
   final _videoRepository = VideoRepository();
 
-  final _saveVideoActionController = StreamController<String>();
-
-  Sink<String> get saveVideoByUrl => _saveVideoActionController.sink;
-
-  final _saveVideoProgressController = StreamController<LoadingState<void>>();
+  final _saveVideoProgressController = BehaviorSubject<LoadingState<void>>();
 
   Stream<LoadingState<void>> get onSaveVideoProgress => _saveVideoProgressController.stream;
 
-  AppBloc(){
-    _saveVideoActionController.stream.listen((url) {
-      _saveVideoProgressController.sink.add(const LoadingState.completed(null));
+  final _videoListController = BehaviorSubject<LoadingState<List<Video>>>.seeded(const LoadingState.completed([]));
+
+  Stream<LoadingState<List<Video>>> get videoList => _videoListController.stream;
+
+  void saveVideoByUrl(String url){
+      _videoRepository.saveVideoByUrl(url).listen((event) {
+      _saveVideoProgressController.sink.add(event);
     });
   }
 
+  void getAllVideos() async{
+    _videoListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideos()) );
+  }
+
   void dispose(){
-    _videoRepository.saveVideoByUrl("https://www.youtube.com/watch?v=UzkiLRom6J8").listen((event) {
-      event.when(loading: (content, progress) => print(progress), completed: ((content) => {}), error: (error) => {});
-    });
+    _saveVideoProgressController.close();
+    _videoListController.close();
   }
 }

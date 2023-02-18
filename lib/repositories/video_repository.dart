@@ -5,6 +5,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../databases/database.dart';
 import '../dtos/loading_state.dart';
+import '../dtos/video.dart' as dto_video;
 
 class VideoRepository {
   final _database = Database();
@@ -14,7 +15,7 @@ class VideoRepository {
 
   // ローカルDBとアプリ内ディレクトリに動画の情報を保存する
   // 動画とサムネイルは指定したディレクトリに'DBに保存される動画ID.拡張子'で保存される
-  Stream<LoadingState<Video>> saveVideoByUrl(String url) async* {
+  Stream<LoadingState<dto_video.Video>> saveVideoByUrl(String url) async* {
     final youtubeExplode = YoutubeExplode();
     final video = await youtubeExplode.videos.get(url);
 
@@ -48,5 +49,9 @@ class VideoRepository {
     await output.close();
 
     _database.saveVideo(videoDto);
+  }
+
+  Future<List<dto_video.Video>> getAllVideos() async {
+    return await _database.getAllVideos();
   }
 }

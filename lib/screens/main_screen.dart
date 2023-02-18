@@ -23,11 +23,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final appModel = BlocProvider.of(context)!.bloc;
-
-    appModel.dispose();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('BottomNavigationBar'),
