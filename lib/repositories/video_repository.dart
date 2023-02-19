@@ -24,9 +24,11 @@ class VideoRepository {
     final audio = streams.first;
     final audioStream = youtubeExplode.videos.streamsClient.get(audio);
 
-    final videoDto = await _database.createEmptyVideo();
+    final videoInfo = await _database.createEmptyVideoInfo();
 
-    final fileName = '${videoDto.id}.${audio.container.name.toString()}';
+    final extension = audio.container.name.toString();
+
+    final fileName = '${videoInfo.id}.$extension';
 
     final dir = await getApplicationDocumentsDirectory();
     final path = dir.path;
@@ -48,10 +50,23 @@ class VideoRepository {
     await output.flush();
     await output.close();
 
-    _database.saveVideo(videoDto);
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, extension);
   }
 
   Future<List<dto_video.Video>> getAllVideos() async {
-    return await _database.getAllVideos();
+
+    List<dto_video.Video> video = [];
+
+    List<VideoInfo> videoInfo = await _database.getAllVideoInfo();
+
+    final dir = await getApplicationDocumentsDirectory();
+    final path = dir.path;
+
+    for (var info in videoInfo) {
+      String videoPath = '$path/$_videoFolder/${info.id}.${info.videoExtension}';
+      video.add(dto_video.Video(info.id, info.title, null, info.createdAt, videoPath));
+    }
+
+    return video;
   }
 }

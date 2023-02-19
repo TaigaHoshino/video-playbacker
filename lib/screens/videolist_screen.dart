@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_playbacker/blocs/bloc_provider.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 import 'package:video_playbacker/dtos/video.dart';
+import 'package:video_playbacker/screens/video_player_screen.dart';
 
 class VideoListScreen extends StatelessWidget{
   const VideoListScreen({Key? key}): super(key: key);
@@ -29,7 +30,7 @@ class VideoListScreen extends StatelessWidget{
                 widget = ListView.builder(
                   itemCount: content.length,
                   itemBuilder: (context, index) {
-                    return VideoListItemsWidget(title: content.elementAt(index).id.toString());
+                    return VideoListItemsWidget(video: content.elementAt(index));
                   }
                   )
               }),
@@ -45,10 +46,11 @@ class VideoListScreen extends StatelessWidget{
 
 class VideoListItemsWidget extends StatelessWidget {
 
+  final Video video;
   String _title = "";
 
-  VideoListItemsWidget({Key? key, required String title}): super(key: key){
-    _title = title;
+  VideoListItemsWidget({Key? key, required this.video}): super(key: key){
+    _title = video.id.toString();
   }
   
   @override
@@ -57,6 +59,7 @@ class VideoListItemsWidget extends StatelessWidget {
       title: Text(_title, textScaleFactor: 2),
       onTap: () {
         print(_title);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
       }
     ));
   }

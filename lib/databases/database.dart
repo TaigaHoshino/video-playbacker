@@ -20,6 +20,7 @@ class VideoInfoList extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   IntColumn get category => integer().references(VideoCategories, #id).nullable()();
+  TextColumn get videoExtension => text()();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
@@ -30,30 +31,23 @@ class Database extends _$Database {
   @override
   int get schemaVersion => 1;
 
-  Future<Video> createEmptyVideo() async {
-    final id = await into(videoInfoList).insert(const VideoInfoListCompanion(title: Value("")));
-    return Video(id, "", null, null);
+  Future<VideoInfo> createEmptyVideoInfo() async {
+    final id = await into(videoInfoList).insert(const VideoInfoListCompanion(title: Value(""), videoExtension: Value("")));
+    return VideoInfo(id: id, title: "", category: null, videoExtension: "", createdAt: null);
   }
 
-  Future<int> saveVideo(Video entry) async {
-    return (update(videoInfoList)..where((tbl) => tbl.id.equals(entry.id))).write(
+  Future<int> saveVideoInfo(int id, String title, int? categoryId, String videoExtension)async {
+    return (update(videoInfoList)..where((tbl) => tbl.id.equals(id))).write(
       VideoInfoListCompanion(
-        title: Value(entry.title),
-        category: Value(entry.category?.id),
+        title: Value(title),
+        category: Value(categoryId),
+        videoExtension: Value(videoExtension)
       )
     );
   }
 
-  Future<List<Video>> getAllVideos() async {
-    final videoInfos = await select(videoInfoList).get();
-
-    List<Video> video = [];
-
-    for (var info in videoInfos) {
-      video.add(Video(info.id, info.title, null, info.createdAt));
-    }
-
-    return video;
+  Future<List<VideoInfo>> getAllVideoInfo() async {
+    return await select(videoInfoList).get();
   }
 }
 

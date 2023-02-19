@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_playbacker/blocs/bloc_provider.dart';
 import 'package:video_playbacker/screens/capture_screen.dart';
 import 'package:video_playbacker/screens/videolist_screen.dart';
 

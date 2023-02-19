@@ -205,6 +205,12 @@ class $VideoInfoListTable extends VideoInfoList
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES video_categories (id)'));
+  static const VerificationMeta _videoExtensionMeta =
+      const VerificationMeta('videoExtension');
+  @override
+  late final GeneratedColumn<String> videoExtension = GeneratedColumn<String>(
+      'video_extension', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -212,7 +218,8 @@ class $VideoInfoListTable extends VideoInfoList
       'created_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, title, category, createdAt];
+  List<GeneratedColumn> get $columns =>
+      [id, title, category, videoExtension, createdAt];
   @override
   String get aliasedName => _alias ?? 'video_info_list';
   @override
@@ -235,6 +242,14 @@ class $VideoInfoListTable extends VideoInfoList
       context.handle(_categoryMeta,
           category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
     }
+    if (data.containsKey('video_extension')) {
+      context.handle(
+          _videoExtensionMeta,
+          videoExtension.isAcceptableOrUnknown(
+              data['video_extension']!, _videoExtensionMeta));
+    } else if (isInserting) {
+      context.missing(_videoExtensionMeta);
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -254,6 +269,8 @@ class $VideoInfoListTable extends VideoInfoList
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       category: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}category']),
+      videoExtension: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}video_extension'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
     );
@@ -269,9 +286,14 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
   final int id;
   final String title;
   final int? category;
+  final String videoExtension;
   final DateTime? createdAt;
   const VideoInfo(
-      {required this.id, required this.title, this.category, this.createdAt});
+      {required this.id,
+      required this.title,
+      this.category,
+      required this.videoExtension,
+      this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -280,6 +302,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<int>(category);
     }
+    map['video_extension'] = Variable<String>(videoExtension);
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
@@ -293,6 +316,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
+      videoExtension: Value(videoExtension),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -306,6 +330,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       category: serializer.fromJson<int?>(json['category']),
+      videoExtension: serializer.fromJson<String>(json['videoExtension']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
     );
   }
@@ -316,6 +341,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'category': serializer.toJson<int?>(category),
+      'videoExtension': serializer.toJson<String>(videoExtension),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
     };
   }
@@ -324,11 +350,13 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           {int? id,
           String? title,
           Value<int?> category = const Value.absent(),
+          String? videoExtension,
           Value<DateTime?> createdAt = const Value.absent()}) =>
       VideoInfo(
         id: id ?? this.id,
         title: title ?? this.title,
         category: category.present ? category.value : this.category,
+        videoExtension: videoExtension ?? this.videoExtension,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
   @override
@@ -337,13 +365,15 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('videoExtension: $videoExtension, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, category, createdAt);
+  int get hashCode =>
+      Object.hash(id, title, category, videoExtension, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -351,6 +381,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           other.id == this.id &&
           other.title == this.title &&
           other.category == this.category &&
+          other.videoExtension == this.videoExtension &&
           other.createdAt == this.createdAt);
 }
 
@@ -358,29 +389,35 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
   final Value<int> id;
   final Value<String> title;
   final Value<int?> category;
+  final Value<String> videoExtension;
   final Value<DateTime?> createdAt;
   const VideoInfoListCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.category = const Value.absent(),
+    this.videoExtension = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   VideoInfoListCompanion.insert({
     this.id = const Value.absent(),
     required String title,
     this.category = const Value.absent(),
+    required String videoExtension,
     this.createdAt = const Value.absent(),
-  }) : title = Value(title);
+  })  : title = Value(title),
+        videoExtension = Value(videoExtension);
   static Insertable<VideoInfo> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<int>? category,
+    Expression<String>? videoExtension,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (category != null) 'category': category,
+      if (videoExtension != null) 'video_extension': videoExtension,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -389,11 +426,13 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
       {Value<int>? id,
       Value<String>? title,
       Value<int?>? category,
+      Value<String>? videoExtension,
       Value<DateTime?>? createdAt}) {
     return VideoInfoListCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       category: category ?? this.category,
+      videoExtension: videoExtension ?? this.videoExtension,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -410,6 +449,9 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
     if (category.present) {
       map['category'] = Variable<int>(category.value);
     }
+    if (videoExtension.present) {
+      map['video_extension'] = Variable<String>(videoExtension.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -422,6 +464,7 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('videoExtension: $videoExtension, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
