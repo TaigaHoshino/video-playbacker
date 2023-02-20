@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_player/video_player.dart';
 
 import '../dtos/video.dart';
@@ -10,71 +11,62 @@ class VideoPlayerScreen extends StatefulWidget {
 
   VideoPlayerScreen(this._video);
   @override
-  _VideoPlayerPageState createState() => _VideoPlayerPageState(_video);
+  _VideoPlayerPageState createState() => _VideoPlayerPageState();
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerScreen> {
-  final Video _video;
-  late VideoPlayerController _controller;
-
-  _VideoPlayerPageState(this._video);
-
-  @override
-  void initState() {
-    _controller = VideoPlayerController.file(File(_video.videoPath));
-    _controller.initialize().then((_) {
-      // 最初のフレームを描画するため初期化後に更新
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final VideoPlayerHandler _videoHandler = VideoPlayerHandler.instance!;
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              // 動画を表示
-              child: VideoPlayer(_controller),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    // 動画を最初から再生
-                    _controller
-                        .seekTo(Duration.zero)
-                        .then((_) => _controller.play());
-                  },
-                  icon: Icon(Icons.refresh),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // 動画を再生
-                    _controller.play();
-                  },
-                  icon: Icon(Icons.play_arrow),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // 動画を一時停止
-                    _controller.pause();
-                  },
-                  icon: Icon(Icons.pause),
-                ),
-              ],
-            ),
-          ],
+    return Column(
+      children: <Widget>[
+        OutlinedButton(onPressed: () {
+            _videoHandler.stop();
+            Navigator.pop(context);
+          }, child: Text('検索')),
+        const Text('With remote mp4'),
+        StreamBuilder<VideoPlayerController?>(
+          stream: _videoHandler.controllerStream,
+          builder: (context, snapshot) {
+            final controller = snapshot.data;
+            if (controller == null) return const Text('With remote mp4');
+            return AspectRatio(
+              aspectRatio: controller.value.aspectRatio,
+              child: VideoPlayer(controller),
+            );
+          },
         ),
-      );
+        SizedBox(
+          height: 100.0,
+          child: StreamBuilder<bool>(
+            stream: _videoHandler.playbackState
+                .map((state) => state.playing)
+                .distinct(),
+            builder: (context, snapshot) {
+              final playing = snapshot.data ?? false;
+
+              return GestureDetector(
+                onTap: (playing) ? _videoHandler.pause : _videoHandler.play,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 50),
+                  reverseDuration: const Duration(milliseconds: 200),
+                  child: Container(
+                    color: Colors.black26,
+                    child: Center(
+                      child: Icon(
+                        playing ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 100.0,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

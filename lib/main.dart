@@ -1,8 +1,13 @@
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'blocs/bloc_holder.dart';
 import 'screens/main_screen.dart';
 
-void main() {
+Future<void> main() async {
+  VideoPlayerHandler.initHandler();
+  final session = await AudioSession.instance;
+  session.configure(const AudioSessionConfiguration.music());
   runApp(const VideoPlaybackApp());
 }
 
