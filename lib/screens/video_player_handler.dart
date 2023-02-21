@@ -1,48 +1,15 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:video_player/video_player.dart';
 
+import '../dtos/video.dart';
+
 class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
   static late final VideoPlayerHandler? instance;
 
-  static final _items = [
-    MediaItem(
-      id: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-      album: "Bee",
-      title: "Bee",
-      artist: "Bee",
-      duration: const Duration(milliseconds: 4000),
-      artUri: Uri.parse(
-          'https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),
-    ),
-    MediaItem(
-      id: 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
-      album: "Butterfly",
-      title: "Butterfly",
-      artist: "Butterfly",
-      duration: const Duration(milliseconds: 7000),
-      artUri: Uri.parse(
-          'https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),
-    ),
-    MediaItem(
-      id: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-      album: "Bee",
-      title: "Bee",
-      artist: "Bee",
-      duration: const Duration(milliseconds: 4000),
-      artUri: Uri.parse(
-          'https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),
-    ),
-    MediaItem(
-      id: 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
-      album: "Butterfly",
-      title: "Butterfly",
-      artist: "Butterfly",
-      duration: const Duration(milliseconds: 7000),
-      artUri: Uri.parse(
-          'https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),
-    ),
-  ];
+  List<_VideoItem> _items = [];
   int _currentMediaItemIndex = 0;
 
   bool _isStopped = false;
@@ -65,9 +32,46 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
   );
   }
 
-  /// Initialise our video handler.
-  VideoPlayerHandler() {
-    _reinitController();
+  Future<void> setPlayList(List<Video> videos) async {
+
+    if(!_isStopped){
+      stop();
+    }
+
+    if(videos.isEmpty){
+      return;
+    }
+
+    _items = [];
+    for(final video in videos){
+      _items.add(_VideoItem(video));
+    } 
+
+    _currentMediaItemIndex = 0;
+
+    await _reinitController();
+  }
+
+  Future<void> moveToTargetVideo(int videoId) async {
+    if(!_isStopped){
+      stop();
+    }
+
+    bool notFoundFlag = true;
+
+    for(int i=0; i<_items.length; i++){
+      if(_items[i].videoId == videoId){
+        _currentMediaItemIndex = i;
+        notFoundFlag = false;
+      }
+    }
+
+    if(notFoundFlag){
+      // TODO: 何かエラーを吐く
+      return;
+    }
+
+    await _reinitController();
   }
 
   // In this simple example, we handle only 4 actions: play, pause, seek and
@@ -111,8 +115,8 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
     previousController?.pause();
     mediaItem.add(_items[_currentMediaItemIndex]);
     _previousPosition = null;
-    _controller = VideoPlayerController.network(
-      _items[_currentMediaItemIndex].id,
+    _controller = VideoPlayerController.file(
+      File(_items[_currentMediaItemIndex].videoPath),
       videoPlayerOptions: VideoPlayerOptions(
         mixWithOthers: false,
         allowBackgroundPlayback: false,
@@ -183,4 +187,13 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
     );
     playbackState.add(newState);
   }
+}
+
+class _VideoItem extends MediaItem {
+
+  final int videoId;
+  final String videoPath;
+
+  _VideoItem(Video video): videoId = video.id, videoPath = video.videoPath, super(id: video.id.toString(), title: video.title, 
+  artUri: Uri.parse('https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),);
 }

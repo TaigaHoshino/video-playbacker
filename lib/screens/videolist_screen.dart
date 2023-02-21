@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_playbacker/blocs/bloc_provider.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 import 'package:video_playbacker/dtos/video.dart';
+import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_playbacker/screens/video_player_screen.dart';
 
 class VideoListScreen extends StatelessWidget{
@@ -27,6 +28,7 @@ class VideoListScreen extends StatelessWidget{
             snapshot.data!.when(
               loading: (_, __) => {},
               completed: ((content) => {
+                VideoPlayerHandler.instance!.setPlayList(content),
                 widget = ListView.builder(
                   itemCount: content.length,
                   itemBuilder: (context, index) {
@@ -59,6 +61,7 @@ class VideoListItemsWidget extends StatelessWidget {
       title: Text(_title, textScaleFactor: 2),
       onTap: () {
         print(_title);
+        VideoPlayerHandler.instance!.moveToTargetVideo(video.id);
         Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
       }
     ));
