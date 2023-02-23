@@ -4,8 +4,10 @@ class Video {
   final int id;
   VideoCategory? category;
   String title = "";
-  DateTime? createdAt;
+  final int videoDurationMillis;
+  DateTime createdAt;
   final String videoPath;
+  final String thumbnailPath;
 
-  Video(this.id, this.title, this.category, this.createdAt, this.videoPath);
+  Video(this.id, this.title, this.category, this.videoDurationMillis, this.createdAt, this.videoPath, this.thumbnailPath);
 }

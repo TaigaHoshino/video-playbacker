@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../databases/database.dart';
@@ -36,10 +37,14 @@ class VideoRepository {
     final videoExtension = manifest.videoOnly.first.container.name.toString();
     final audioExtension = manifest.audioOnly.first.container.name.toString();
 
-    final directory = Directory('$_docDirPath/$_videoFolder/');
-    await directory.create(recursive: true);
+    final videoDirectory = Directory('$_docDirPath/$_videoFolder/');
+    await videoDirectory.create(recursive: true);
 
-    final outputPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.$videoExtension';
+    final thumbnailDirectory = Directory('$_docDirPath/$_thumbnailFolder/');
+    await thumbnailDirectory.create(recursive: true);
+
+    final outputVideoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.$videoExtension';
+    final outputThumbnailPath = '$_docDirPath/$_thumbnailFolder/${videoInfo.id}.jpg';
     final videoTmpPath = '$_tmpDirPath/video${videoInfo.id}.$videoExtension';
     final audioTmpPath = '$_tmpDirPath/audio${videoInfo.id}.$audioExtension';
 
@@ -51,13 +56,30 @@ class VideoRepository {
                             youtubeExplode.videos.streamsClient.get(manifest.audioOnly.withHighestBitrate()),
                             manifest.audioOnly.withHighestBitrate().size.totalBytes);
 
-    bool isSuccess = await _muxVideoAndAudio(outputPath, videoTmpPath, audioTmpPath);
-
-    if(!isSuccess){
-      throw Exception('Failed to muxing video and audio');
+    if(!await _muxVideoAndAudio(outputVideoPath, videoTmpPath, audioTmpPath)){
+      throw Exception('Failed to mux video and audio');
     }
 
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, true);
+    final controller = VideoPlayerController.file(File(outputVideoPath));
+    await controller.initialize();
+
+    print('duration: ${controller.value.duration}');
+    int duration = controller.value.duration.inMilliseconds;
+
+    bool isSuccess = false;
+
+    if(duration < 10000){
+      isSuccess = await _createThumbnail(outputThumbnailPath, outputVideoPath, 5);
+    }
+    else {
+      isSuccess = await _createThumbnail(outputThumbnailPath, outputVideoPath, 5);
+    }
+
+    if(!isSuccess){
+      throw Exception('Failed to create thumbnail');
+    }
+
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, duration, true, DateTime.now());
     return _createVideoBy(videoInfo);
   }
 
@@ -77,17 +99,17 @@ class VideoRepository {
 
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
     String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
-    return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.createdAt, videoPath);
+    String thumbnailPath = '$_docDirPath/$_thumbnailFolder/${videoInfo.id}.jpg';
+    return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.videoDurationMillis, videoInfo.createdAt!, videoPath, thumbnailPath);
   }
 
   Future<void> _writeStreamToFile(String targetPath ,Stream<List<int>> stream, int length) async {
     final file = File(targetPath);
     final output = file.openWrite(mode: FileMode.writeOnlyAppend);
     var count = 0;
-    print('write bigin: $targetPath');
+    print('write begin: $targetPath');
     await for (final data in stream){
       count += data.length;
-      var progress = ((count / length) * 100).ceil();
       output.add(data);
     }
     await output.flush();
@@ -97,16 +119,36 @@ class VideoRepository {
 
   Future<bool> _muxVideoAndAudio(String outputFilePath, String videoPath, String audioPath)async{
     File(outputFilePath);
-    print('mix video and audio: $outputFilePath');
+    print('mux video and audio: $outputFilePath');
     bool isSuccess = false;
     await FFmpegKit.execute('-i "$videoPath" -i "$audioPath" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 "$outputFilePath"').then((session) async {
       final returnCode = await session.getReturnCode();
       if(ReturnCode.isSuccess(returnCode)){
-        print('save video succes');
+        print('mux video and audio success');
         isSuccess = true;
       }
       else {
-        print('save video error');
+        print('mux video and audio error');
+        isSuccess = false;
+      }
+    });
+
+    return isSuccess;
+  }
+
+  Future<bool> _createThumbnail(String outputFilePath, String videoPath, int offsetSeconds) async{
+    File(outputFilePath);
+    print('create thumbnail: $outputFilePath');
+    bool isSuccess = false;
+    print('-i "$videoPath" -r 1 -ss $offsetSeconds -frames 1 "$outputFilePath"');
+    await FFmpegKit.execute('-ss $offsetSeconds -i "$videoPath" -frames:v 1 "$outputFilePath"').then((session) async {
+      final returnCode = await session.getReturnCode();
+      if(ReturnCode.isSuccess(returnCode)){
+        print('create thumbnail success');
+        isSuccess = true;
+      }
+      else {
+        print('create thumbnail error');
         isSuccess = false;
       }
     });

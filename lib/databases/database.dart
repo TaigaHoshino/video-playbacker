@@ -16,9 +16,10 @@ class VideoCategories extends Table {
 @DataClassName('VideoInfo')
 class VideoInfoList extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text()();
+  TextColumn get title => text().withDefault(const Constant(""))();
   IntColumn get category => integer().references(VideoCategories, #id).nullable()();
-  TextColumn get videoExtension => text()();
+  TextColumn get videoExtension => text().withDefault(const Constant(""))();
+  IntColumn get videoDurationMillis => integer().withDefault(const Constant(0))();
   BoolColumn get isEnable => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
@@ -31,17 +32,19 @@ class Database extends _$Database {
   int get schemaVersion => 1;
 
   Future<VideoInfo> createEmptyVideoInfo() async {
-    final id = await into(videoInfoList).insert(const VideoInfoListCompanion(title: Value(""), videoExtension: Value("")));
-    return VideoInfo(id: id, title: "", category: null, videoExtension: "", isEnable: false, createdAt: null);
+    final id = await into(videoInfoList).insert(const VideoInfoListCompanion());
+    return VideoInfo(id: id, title: "", category: null, videoExtension: "", videoDurationMillis: 0, isEnable: false, createdAt: null);
   }
 
-  Future<int> saveVideoInfo(int id, String title, int? categoryId, String videoExtension, bool isEnable)async {
+  Future<int> saveVideoInfo(int id, String title, int? categoryId, String videoExtension, int duration, bool isEnable, DateTime createdAt) async {
     return (update(videoInfoList)..where((tbl) => tbl.id.equals(id))).write(
       VideoInfoListCompanion(
         title: Value(title),
         category: Value(categoryId),
         videoExtension: Value(videoExtension),
-        isEnable: Value(isEnable)
+        isEnable: Value(isEnable),
+        videoDurationMillis: Value(duration),
+        createdAt: Value(createdAt)
       )
     );
   }

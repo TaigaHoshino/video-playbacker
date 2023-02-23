@@ -195,7 +195,9 @@ class $VideoInfoListTable extends VideoInfoList
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
       'title', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(""));
   static const VerificationMeta _categoryMeta =
       const VerificationMeta('category');
   @override
@@ -210,7 +212,17 @@ class $VideoInfoListTable extends VideoInfoList
   @override
   late final GeneratedColumn<String> videoExtension = GeneratedColumn<String>(
       'video_extension', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(""));
+  static const VerificationMeta _videoDurationMillisMeta =
+      const VerificationMeta('videoDurationMillis');
+  @override
+  late final GeneratedColumn<int> videoDurationMillis = GeneratedColumn<int>(
+      'video_duration_millis', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _isEnableMeta =
       const VerificationMeta('isEnable');
   @override
@@ -231,8 +243,15 @@ class $VideoInfoListTable extends VideoInfoList
       'created_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, title, category, videoExtension, isEnable, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        category,
+        videoExtension,
+        videoDurationMillis,
+        isEnable,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? 'video_info_list';
   @override
@@ -248,8 +267,6 @@ class $VideoInfoListTable extends VideoInfoList
     if (data.containsKey('title')) {
       context.handle(
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
-    } else if (isInserting) {
-      context.missing(_titleMeta);
     }
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
@@ -260,8 +277,12 @@ class $VideoInfoListTable extends VideoInfoList
           _videoExtensionMeta,
           videoExtension.isAcceptableOrUnknown(
               data['video_extension']!, _videoExtensionMeta));
-    } else if (isInserting) {
-      context.missing(_videoExtensionMeta);
+    }
+    if (data.containsKey('video_duration_millis')) {
+      context.handle(
+          _videoDurationMillisMeta,
+          videoDurationMillis.isAcceptableOrUnknown(
+              data['video_duration_millis']!, _videoDurationMillisMeta));
     }
     if (data.containsKey('is_enable')) {
       context.handle(_isEnableMeta,
@@ -288,6 +309,8 @@ class $VideoInfoListTable extends VideoInfoList
           .read(DriftSqlType.int, data['${effectivePrefix}category']),
       videoExtension: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}video_extension'])!,
+      videoDurationMillis: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}video_duration_millis'])!,
       isEnable: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_enable'])!,
       createdAt: attachedDatabase.typeMapping
@@ -306,6 +329,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
   final String title;
   final int? category;
   final String videoExtension;
+  final int videoDurationMillis;
   final bool isEnable;
   final DateTime? createdAt;
   const VideoInfo(
@@ -313,6 +337,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       required this.title,
       this.category,
       required this.videoExtension,
+      required this.videoDurationMillis,
       required this.isEnable,
       this.createdAt});
   @override
@@ -324,6 +349,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       map['category'] = Variable<int>(category);
     }
     map['video_extension'] = Variable<String>(videoExtension);
+    map['video_duration_millis'] = Variable<int>(videoDurationMillis);
     map['is_enable'] = Variable<bool>(isEnable);
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -339,6 +365,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           ? const Value.absent()
           : Value(category),
       videoExtension: Value(videoExtension),
+      videoDurationMillis: Value(videoDurationMillis),
       isEnable: Value(isEnable),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
@@ -354,6 +381,8 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       title: serializer.fromJson<String>(json['title']),
       category: serializer.fromJson<int?>(json['category']),
       videoExtension: serializer.fromJson<String>(json['videoExtension']),
+      videoDurationMillis:
+          serializer.fromJson<int>(json['videoDurationMillis']),
       isEnable: serializer.fromJson<bool>(json['isEnable']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
     );
@@ -366,6 +395,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
       'title': serializer.toJson<String>(title),
       'category': serializer.toJson<int?>(category),
       'videoExtension': serializer.toJson<String>(videoExtension),
+      'videoDurationMillis': serializer.toJson<int>(videoDurationMillis),
       'isEnable': serializer.toJson<bool>(isEnable),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
     };
@@ -376,6 +406,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           String? title,
           Value<int?> category = const Value.absent(),
           String? videoExtension,
+          int? videoDurationMillis,
           bool? isEnable,
           Value<DateTime?> createdAt = const Value.absent()}) =>
       VideoInfo(
@@ -383,6 +414,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
         title: title ?? this.title,
         category: category.present ? category.value : this.category,
         videoExtension: videoExtension ?? this.videoExtension,
+        videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
         isEnable: isEnable ?? this.isEnable,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
@@ -393,6 +425,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           ..write('title: $title, ')
           ..write('category: $category, ')
           ..write('videoExtension: $videoExtension, ')
+          ..write('videoDurationMillis: $videoDurationMillis, ')
           ..write('isEnable: $isEnable, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -400,8 +433,8 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, category, videoExtension, isEnable, createdAt);
+  int get hashCode => Object.hash(id, title, category, videoExtension,
+      videoDurationMillis, isEnable, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -410,6 +443,7 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
           other.title == this.title &&
           other.category == this.category &&
           other.videoExtension == this.videoExtension &&
+          other.videoDurationMillis == this.videoDurationMillis &&
           other.isEnable == this.isEnable &&
           other.createdAt == this.createdAt);
 }
@@ -419,6 +453,7 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
   final Value<String> title;
   final Value<int?> category;
   final Value<String> videoExtension;
+  final Value<int> videoDurationMillis;
   final Value<bool> isEnable;
   final Value<DateTime?> createdAt;
   const VideoInfoListCompanion({
@@ -426,23 +461,25 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
     this.title = const Value.absent(),
     this.category = const Value.absent(),
     this.videoExtension = const Value.absent(),
+    this.videoDurationMillis = const Value.absent(),
     this.isEnable = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   VideoInfoListCompanion.insert({
     this.id = const Value.absent(),
-    required String title,
+    this.title = const Value.absent(),
     this.category = const Value.absent(),
-    required String videoExtension,
+    this.videoExtension = const Value.absent(),
+    this.videoDurationMillis = const Value.absent(),
     this.isEnable = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : title = Value(title),
-        videoExtension = Value(videoExtension);
+  });
   static Insertable<VideoInfo> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<int>? category,
     Expression<String>? videoExtension,
+    Expression<int>? videoDurationMillis,
     Expression<bool>? isEnable,
     Expression<DateTime>? createdAt,
   }) {
@@ -451,6 +488,8 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
       if (title != null) 'title': title,
       if (category != null) 'category': category,
       if (videoExtension != null) 'video_extension': videoExtension,
+      if (videoDurationMillis != null)
+        'video_duration_millis': videoDurationMillis,
       if (isEnable != null) 'is_enable': isEnable,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -461,6 +500,7 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
       Value<String>? title,
       Value<int?>? category,
       Value<String>? videoExtension,
+      Value<int>? videoDurationMillis,
       Value<bool>? isEnable,
       Value<DateTime?>? createdAt}) {
     return VideoInfoListCompanion(
@@ -468,6 +508,7 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
       title: title ?? this.title,
       category: category ?? this.category,
       videoExtension: videoExtension ?? this.videoExtension,
+      videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
       isEnable: isEnable ?? this.isEnable,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -488,6 +529,9 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
     if (videoExtension.present) {
       map['video_extension'] = Variable<String>(videoExtension.value);
     }
+    if (videoDurationMillis.present) {
+      map['video_duration_millis'] = Variable<int>(videoDurationMillis.value);
+    }
     if (isEnable.present) {
       map['is_enable'] = Variable<bool>(isEnable.value);
     }
@@ -504,6 +548,7 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
           ..write('title: $title, ')
           ..write('category: $category, ')
           ..write('videoExtension: $videoExtension, ')
+          ..write('videoDurationMillis: $videoDurationMillis, ')
           ..write('isEnable: $isEnable, ')
           ..write('createdAt: $createdAt')
           ..write(')'))

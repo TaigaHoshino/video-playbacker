@@ -114,7 +114,6 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
     _controller?.setLooping(true);
     _controller?.initialize();
     _controller?.addListener(_broadcastState);
-    _controller?.play();
     Future<void>.delayed(
       const Duration(milliseconds: 100),
       () => previousController?.dispose(),
@@ -165,6 +164,9 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
         MediaControl.skipToNext,
         MediaControl.stop,
       ],
+      systemActions: const {
+        MediaAction.seek
+      },
       bufferedPosition: Duration.zero,
       updatePosition: (diff != null && diff > 0 && diff < 600)
           ? playbackState.value.updatePosition
@@ -182,5 +184,5 @@ class _VideoItem extends MediaItem {
   final String videoPath;
 
   _VideoItem(Video video): videoId = video.id, videoPath = video.videoPath, super(id: video.id.toString(), title: video.title, 
-  artUri: Uri.parse('https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),);
+  duration: Duration(milliseconds: video.videoDurationMillis));
 }
