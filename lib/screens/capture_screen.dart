@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:video_playbacker/blocs/bloc_provider.dart';
+import 'package:get_it/get_it.dart';
+import 'package:video_playbacker/blocs/app_bloc.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 
 class CaptureScreen extends StatelessWidget{
@@ -23,7 +24,7 @@ class _UrlFormState extends State<UrlForm> {
   Widget build(BuildContext context){
     String _text = "";
 
-    final appBloc = BlocProvider.of(context)!.bloc;
+    final appBloc = GetIt.I<AppBloc>();
 
     return Container(
       padding: const EdgeInsets.all(10.0),
@@ -34,9 +35,8 @@ class _UrlFormState extends State<UrlForm> {
           TextField(onChanged: (text) { _text = text;},),
           OutlinedButton(onPressed: () {
             appBloc.saveVideoByUrl(_text);
-            showDialog(context: context, builder: (context) {
+            showDialog(context: context, barrierDismissible: false, builder: (context) {
               return AlertDialog(
-                title:  const Text('ダウンロード中'),
                 content: StreamBuilder<LoadingState<void>>(
                   stream: appBloc.onSaveVideoProgress,
                   builder: (context, snapshot){
@@ -48,26 +48,31 @@ class _UrlFormState extends State<UrlForm> {
 
                     snapshot.data!.when(
                       loading: (_, int? progress) => { 
-                        widget = const LinearProgressIndicator()
+                        widget = Column(children: const <Widget>[
+                          Text("ダウンロード中"),
+                          LinearProgressIndicator()
+                        ],)
                       },
                       completed: ((content) => {
-                        Navigator.pop(context)
+                        widget = Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const Text("ダウンロードが完了しました"),
+                            OutlinedButton(onPressed: () {Navigator.pop(context);}, child: const Text('とじる')),
+                        ],)
                       }),
-                      error: ((_) {
-                        widget = const Text("エラーが発生しました");
+                      error: ((_) => {
+                        widget = Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const Text("エラーが発生しました"),
+                            OutlinedButton(onPressed: () {Navigator.pop(context);}, child: const Text('とじる')),
+                        ],)
                       })
                     );
-                      return widget;
+                  return widget;
                   }
                 ),
-                actions: <Widget>[
-                    GestureDetector(
-                      child: const Text('キャンセル'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    )
-                  ]
               );
             });
           }, child: const Text('検索'))]),

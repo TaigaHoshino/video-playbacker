@@ -7,8 +7,6 @@ import 'package:video_player/video_player.dart';
 import '../dtos/video.dart';
 
 class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
-  static late final VideoPlayerHandler? instance;
-
   List<_VideoItem> _items = [];
   int _currentMediaItemIndex = 0;
 
@@ -20,17 +18,6 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
 
   Stream<VideoPlayerController?> get controllerStream =>
       _controllerSubject.stream;
-
-  static void initHandler() async {
-    instance = await AudioService.init(
-    builder: () => VideoPlayerHandler(),
-    config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.tanukis.videoPlayBacker',
-      androidNotificationChannelName: 'Audio playback',
-      androidStopForegroundOnPause: true,
-    ),
-  );
-  }
 
   Future<void> setPlayList(List<Video> videos) async {
 

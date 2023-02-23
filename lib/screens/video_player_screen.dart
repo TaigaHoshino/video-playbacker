@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_player/video_player.dart';
 
@@ -15,7 +14,7 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerScreen> {
-  final VideoPlayerHandler _videoHandler = VideoPlayerHandler.instance!;
+  final VideoPlayerHandler _videoHandler = GetIt.I<VideoPlayerHandler>();
 
   @override
   Widget build(BuildContext context) {

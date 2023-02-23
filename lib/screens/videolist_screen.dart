@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:video_playbacker/blocs/bloc_provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 import 'package:video_playbacker/dtos/video.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_playbacker/screens/video_player_screen.dart';
+
+import '../blocs/app_bloc.dart';
 
 class VideoListScreen extends StatelessWidget{
   const VideoListScreen({Key? key}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final appBloc = BlocProvider.of(context)!.bloc;
+    final appBloc = GetIt.I<AppBloc>();
 
     appBloc.getAllVideos();
 
@@ -28,7 +30,7 @@ class VideoListScreen extends StatelessWidget{
             snapshot.data!.when(
               loading: (_, __) => {},
               completed: ((content) => {
-                VideoPlayerHandler.instance!.setPlayList(content),
+                GetIt.I<VideoPlayerHandler>().setPlayList(content),
                 widget = ListView.builder(
                   itemCount: content.length,
                   itemBuilder: (context, index) {
@@ -61,7 +63,7 @@ class VideoListItemsWidget extends StatelessWidget {
       title: Text(_title, textScaleFactor: 2),
       onTap: () {
         print(_title);
-        VideoPlayerHandler.instance!.moveToTargetVideo(video.id);
+        GetIt.I<VideoPlayerHandler>().moveToTargetVideo(video.id);
         Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
       }
     ));

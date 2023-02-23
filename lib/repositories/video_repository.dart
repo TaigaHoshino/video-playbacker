@@ -11,9 +11,18 @@ import '../dtos/video.dart' as dto_video;
 class VideoRepository {
   final _database = Database();
   String _docDirPath = "";
+  String _tmpDirPath = "";
 
   static const _videoFolder = "video";
   static const _thumbnailFolder = "thumbnail";
+
+  void init() async{
+    final docDir = await getApplicationDocumentsDirectory();
+    _docDirPath = docDir.path;
+
+    final tmpDir = await getTemporaryDirectory();
+    _tmpDirPath = tmpDir.path;
+  }
 
   // ローカルDBとアプリ内ディレクトリに動画の情報を保存する
   // 動画とサムネイルは指定したディレクトリに'DBに保存される動画ID.拡張子'で保存される
@@ -22,21 +31,17 @@ class VideoRepository {
 
     final videoInfo = await _database.createEmptyVideoInfo();
 
-    final dirPath = await _getDocumentDirPath();
-    final tempDir = await getTemporaryDirectory();
-    final tempDirPath = tempDir.path;
-
     final manifest = await youtubeExplode.videos.streamsClient.getManifest(url);
 
     final videoExtension = manifest.videoOnly.first.container.name.toString();
     final audioExtension = manifest.audioOnly.first.container.name.toString();
 
-    final directory = Directory('$dirPath/$_videoFolder/');
+    final directory = Directory('$_docDirPath/$_videoFolder/');
     await directory.create(recursive: true);
 
-    final outputPath = '$dirPath/$_videoFolder/${videoInfo.id}.$videoExtension';
-    final videoTmpPath = '$tempDirPath/video${videoInfo.id}.$videoExtension';
-    final audioTmpPath = '$tempDirPath/audio${videoInfo.id}.$audioExtension';
+    final outputPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.$videoExtension';
+    final videoTmpPath = '$_tmpDirPath/video${videoInfo.id}.$videoExtension';
+    final audioTmpPath = '$_tmpDirPath/audio${videoInfo.id}.$audioExtension';
 
     await _writeStreamToFile(videoTmpPath,
                             youtubeExplode.videos.streamsClient.get(manifest.videoOnly.first),
@@ -71,18 +76,8 @@ class VideoRepository {
   }
 
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
-    final dirPath = await _getDocumentDirPath();
-    String videoPath = '$dirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
+    String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
     return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.createdAt, videoPath);
-  }
-
-  Future<String> _getDocumentDirPath() async {
-    if(_docDirPath.isNotEmpty){
-      return _docDirPath;
-    }
-
-    final dir = await getApplicationDocumentsDirectory();
-    return dir.path;
   }
 
   Future<void> _writeStreamToFile(String targetPath ,Stream<List<int>> stream, int length) async {

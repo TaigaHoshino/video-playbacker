@@ -1,11 +1,28 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:video_playbacker/blocs/app_bloc.dart';
+import 'package:video_playbacker/repositories/video_repository.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
-import 'blocs/bloc_holder.dart';
 import 'screens/main_screen.dart';
 
 Future<void> main() async {
-  VideoPlayerHandler.initHandler();
+  final videoPlayerHandler = await AudioService.init(
+    builder: () => VideoPlayerHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.tanukis.videoPlayBacker',
+      androidNotificationChannelName: 'Audio playback',
+      androidStopForegroundOnPause: true,
+    )
+  );
+  final videoRepository = VideoRepository();
+  videoRepository.init();
+
+  // TODO: DIライブラリとして`GetIt`を使用しているが、ライブラリを変更する可能性を考えてDIライブラリをラップするオブジェクトを作った方がよい
+  GetIt.I.registerSingleton(videoPlayerHandler);
+  GetIt.I.registerSingleton(AppBloc(videoRepository));
+
   final session = await AudioSession.instance;
   session.configure(const AudioSessionConfiguration.music());
   runApp(const VideoPlaybackApp());
@@ -31,7 +48,7 @@ class VideoPlaybackApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const BlocHolder(child: MainScreen()),
+      home: const MainScreen(),
     );
   }
 }

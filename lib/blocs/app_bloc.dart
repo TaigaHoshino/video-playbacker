@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:video_playbacker/dtos/loading_state.dart';
@@ -7,7 +8,7 @@ import '../dtos/video.dart';
 import '../repositories/video_repository.dart';
 
 class AppBloc{
-  final _videoRepository = VideoRepository();
+  final _videoRepository;
 
   final _saveVideoProgressController = BehaviorSubject<LoadingState<Video>>();
 
@@ -17,6 +18,8 @@ class AppBloc{
 
   Stream<LoadingState<List<Video>>> get videoList => _videoListController.stream;
 
+  AppBloc(VideoRepository videoRepository): _videoRepository = videoRepository;
+
   void saveVideoByUrl(String url) async{
     _saveVideoProgressController.sink.add(const LoadingState.loading(null, null));
     try{
@@ -25,6 +28,9 @@ class AppBloc{
     }
     on Exception catch (e){
       _saveVideoProgressController.sink.add(LoadingState.error(e));
+    }
+    catch (e) {
+      _saveVideoProgressController.sink.add(LoadingState.error(Exception('Enexpected error is happened')));
     }
   }
 
