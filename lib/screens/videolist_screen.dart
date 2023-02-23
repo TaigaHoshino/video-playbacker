@@ -10,14 +10,14 @@ class VideoListScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    final appModel = BlocProvider.of(context)!.bloc;
+    final appBloc = BlocProvider.of(context)!.bloc;
 
-    appModel.getAllVideos();
+    appBloc.getAllVideos();
 
     return Scaffold(
       body: 
         StreamBuilder<LoadingState<List<Video>>>(
-          stream: appModel.videoList,
+          stream: appBloc.videoList,
           builder: (context, snapshot){
             Widget widget = Text("");
 

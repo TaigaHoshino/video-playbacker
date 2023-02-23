@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_playbacker/blocs/bloc_provider.dart';
+import 'package:video_playbacker/dtos/loading_state.dart';
 
 class CaptureScreen extends StatelessWidget{
   const CaptureScreen({Key? key}): super(key: key);
@@ -29,11 +30,47 @@ class _UrlFormState extends State<UrlForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("動画URLを入力"),
+          const Text("動画URLを入力"),
           TextField(onChanged: (text) { _text = text;},),
           OutlinedButton(onPressed: () {
             appBloc.saveVideoByUrl(_text);
-          }, child: Text('検索'))]),
+            showDialog(context: context, builder: (context) {
+              return AlertDialog(
+                title:  const Text('ダウンロード中'),
+                content: StreamBuilder<LoadingState<void>>(
+                  stream: appBloc.onSaveVideoProgress,
+                  builder: (context, snapshot){
+                    Widget widget = const Text("");
+
+                    if(!snapshot.hasData){
+                      return widget;
+                    }
+
+                    snapshot.data!.when(
+                      loading: (_, int? progress) => { 
+                        widget = const LinearProgressIndicator()
+                      },
+                      completed: ((content) => {
+                        Navigator.pop(context)
+                      }),
+                      error: ((_) {
+                        widget = const Text("エラーが発生しました");
+                      })
+                    );
+                      return widget;
+                  }
+                ),
+                actions: <Widget>[
+                    GestureDetector(
+                      child: const Text('キャンセル'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  ]
+              );
+            });
+          }, child: const Text('検索'))]),
           );
   }
 }
