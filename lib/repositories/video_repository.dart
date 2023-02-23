@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../databases/database.dart';
-import '../dtos/loading_state.dart';
 import '../dtos/video.dart' as dto_video;
 
 class VideoRepository {
@@ -53,7 +52,7 @@ class VideoRepository {
       throw Exception('Failed to muxing video and audio');
     }
 
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension);
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, true);
     return _createVideoBy(videoInfo);
   }
 
@@ -64,6 +63,7 @@ class VideoRepository {
     List<VideoInfo> videoInfo = await _database.getAllVideoInfo();
 
     for (var info in videoInfo) {
+      if(!info.isEnable) continue;
       video.add(await _createVideoBy(info));
     }
 

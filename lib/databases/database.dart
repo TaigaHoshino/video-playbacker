@@ -5,8 +5,6 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../dtos/video.dart';
-
 part 'database.g.dart';
 
 @DataClassName('VideoCategory')
@@ -21,6 +19,7 @@ class VideoInfoList extends Table {
   TextColumn get title => text()();
   IntColumn get category => integer().references(VideoCategories, #id).nullable()();
   TextColumn get videoExtension => text()();
+  BoolColumn get isEnable => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
@@ -33,15 +32,16 @@ class Database extends _$Database {
 
   Future<VideoInfo> createEmptyVideoInfo() async {
     final id = await into(videoInfoList).insert(const VideoInfoListCompanion(title: Value(""), videoExtension: Value("")));
-    return VideoInfo(id: id, title: "", category: null, videoExtension: "", createdAt: null);
+    return VideoInfo(id: id, title: "", category: null, videoExtension: "", isEnable: false, createdAt: null);
   }
 
-  Future<int> saveVideoInfo(int id, String title, int? categoryId, String videoExtension)async {
+  Future<int> saveVideoInfo(int id, String title, int? categoryId, String videoExtension, bool isEnable)async {
     return (update(videoInfoList)..where((tbl) => tbl.id.equals(id))).write(
       VideoInfoListCompanion(
         title: Value(title),
         category: Value(categoryId),
-        videoExtension: Value(videoExtension)
+        videoExtension: Value(videoExtension),
+        isEnable: Value(isEnable)
       )
     );
   }
