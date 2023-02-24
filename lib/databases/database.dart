@@ -49,8 +49,22 @@ class Database extends _$Database {
     );
   }
 
-  Future<List<VideoInfo>> getAllVideoInfo() async {
-    return await select(videoInfoList).get();
+  Future<int> updateVideoInfo(int id, String title, int? categoryId, bool isEnable) async {
+    return (update(videoInfoList)..where((tbl) => tbl.id.equals(id))).write(
+      VideoInfoListCompanion(
+        title: Value(title),
+        category: Value(categoryId),
+        isEnable: Value(isEnable),
+      )
+    );
+  }
+
+  Future<List<VideoInfo>> getVideoInfoListBy(bool isEnable) async {
+    return await (select(videoInfoList)..where((tbl) => tbl.isEnable.equals(isEnable))).get();
+  }
+
+  Future<void> deleteVideoInfo(int id){
+    return (delete(videoInfoList)..where((tbl) => tbl.id.equals(id))).go();
   }
 }
 

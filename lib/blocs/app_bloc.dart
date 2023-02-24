@@ -20,22 +20,36 @@ class AppBloc{
 
   AppBloc(VideoRepository videoRepository): _videoRepository = videoRepository;
 
-  void saveVideoByUrl(String url) async{
+  Future<void> saveVideoByUrl(String url) async{
     _saveVideoProgressController.sink.add(const LoadingState.loading(null, null));
     try{
       final video = await _videoRepository.saveVideoByUrl(url);
       _saveVideoProgressController.sink.add(LoadingState.completed(video));
     }
     on Exception catch (e){
+      print(e);
       _saveVideoProgressController.sink.add(LoadingState.error(e));
     }
     catch (e) {
+      print(e);
       _saveVideoProgressController.sink.add(LoadingState.error(Exception('Enexpected error is happened')));
     }
   }
 
-  void getAllVideos() async{
+  Future<void> getAllVideos() async{
     _videoListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideos()) );
+  }
+
+  // 万が一削除に失敗しても次回起動時に再度削除を実施するため、削除可否のコールバックは返さない
+  Future<void> deleteVideo(Video video) async {
+    try {
+      _videoRepository.deleteVideo(video);
+    }
+    catch (e) {
+      print(e);
+    }
+
+    getAllVideos();
   }
 
   void dispose(){

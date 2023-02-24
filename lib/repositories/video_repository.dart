@@ -23,6 +23,18 @@ class VideoRepository {
 
     final tmpDir = await getTemporaryDirectory();
     _tmpDirPath = tmpDir.path;
+
+    final videoInfoList = await _database.getVideoInfoListBy(false);
+
+    for(final videoInfo in videoInfoList){
+      final video = await _createVideoBy(videoInfo);
+      try {
+        await deleteVideo(video);
+      }
+      catch (e) {
+        print(e);
+      }
+    }
   }
 
   // ローカルDBとアプリ内ディレクトリに動画の情報を保存する
@@ -56,6 +68,9 @@ class VideoRepository {
                             youtubeExplode.videos.streamsClient.get(manifest.audioOnly.withHighestBitrate()),
                             manifest.audioOnly.withHighestBitrate().size.totalBytes);
 
+    // この先の処理に失敗した時に備えて一旦データを保存する(処理に失敗したデータを削除するために必要)
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, 0, false, DateTime.now());
+
     if(!await _muxVideoAndAudio(outputVideoPath, videoTmpPath, audioTmpPath)){
       throw Exception('Failed to mux video and audio');
     }
@@ -87,20 +102,51 @@ class VideoRepository {
 
     List<dto_video.Video> video = [];
 
-    List<VideoInfo> videoInfo = await _database.getAllVideoInfo();
+    List<VideoInfo> videoInfo = await _database.getVideoInfoListBy(true);
 
     for (var info in videoInfo) {
-      if(!info.isEnable) continue;
       video.add(await _createVideoBy(info));
     }
 
     return video;
   }
 
+  Future<void> deleteVideo(dto_video.Video video) async {
+    _database.updateVideoInfo(video.id, video.title, video.category?.id, false);
+
+    try{
+      await _deleteFile(video.videoPath);
+    }
+    on FileSystemException catch(e) {
+      // ファイルが見つからずエラーが出た場合は処理を継続する
+      if(e.osError?.errorCode == 2) {
+        print(e);
+      }
+      else {
+        rethrow;
+      }
+    }
+    
+    try{
+      await _deleteFile(video.thumbnailPath);
+    }
+    on FileSystemException catch(e) {
+      // ファイルが見つからずエラーが出た場合は処理を継続する
+      if(e.osError?.errorCode == 2) {
+        print(e);
+      }
+      else {
+        rethrow;
+      }
+    }
+
+    _database.deleteVideoInfo(video.id);
+  } 
+
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
     String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
     String thumbnailPath = '$_docDirPath/$_thumbnailFolder/${videoInfo.id}.jpg';
-    return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.videoDurationMillis, videoInfo.createdAt!, videoPath, thumbnailPath);
+    return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.videoDurationMillis, videoInfo.createdAt ?? DateTime.now(), videoPath, thumbnailPath);
   }
 
   Future<void> _writeStreamToFile(String targetPath ,Stream<List<int>> stream, int length) async {
@@ -152,7 +198,14 @@ class VideoRepository {
         isSuccess = false;
       }
     });
-
+    
     return isSuccess;
+  }
+
+  Future<void> _deleteFile(String filePath) async {
+    final file = File(filePath);
+    await file.delete();
+    
+    print('delete file success. filePath: $filePath');
   }
 }

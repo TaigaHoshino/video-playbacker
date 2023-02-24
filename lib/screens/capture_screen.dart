@@ -48,9 +48,11 @@ class _UrlFormState extends State<UrlForm> {
 
                     snapshot.data!.when(
                       loading: (_, int? progress) => { 
-                        widget = Column(children: const <Widget>[
-                          Text("ダウンロード中"),
-                          LinearProgressIndicator()
+                        widget = Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const <Widget>[
+                            Text("ダウンロード中"),
+                            LinearProgressIndicator()
                         ],)
                       },
                       completed: ((content) => {

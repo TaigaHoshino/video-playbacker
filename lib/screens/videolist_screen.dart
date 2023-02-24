@@ -58,6 +58,9 @@ class VideoListItemsWidget extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+
+    final appBloc = GetIt.I<AppBloc>();
+
     return ListTile(
       title: Text(video.title, overflow: TextOverflow.ellipsis),
       subtitle: Text(video.createdAt.toString(), overflow: TextOverflow.ellipsis),
@@ -85,15 +88,18 @@ class VideoListItemsWidget extends StatelessWidget {
                     title: const Text("確認"),
                     content: Text('タイトル:"${video.title}"を削除します。本当にいいですか?'),
                     actions: <Widget>[
-                      GestureDetector(
+                      TextButton(
                         child: const Text('いいえ'),
-                        onTap: () {
+                        onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
-                      GestureDetector(
+                      TextButton(
                         child: const Text('はい'),
-                        onTap: () {},
+                        onPressed: () {
+                          appBloc.deleteVideo(video);
+                          Navigator.pop(context);
+                        },
                       )
                     ],
                   );
