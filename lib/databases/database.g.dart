@@ -3,6 +3,339 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
+class $VideoInfoListTable extends VideoInfoList
+    with TableInfo<$VideoInfoListTable, VideoInfo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VideoInfoListTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(""));
+  static const VerificationMeta _videoExtensionMeta =
+      const VerificationMeta('videoExtension');
+  @override
+  late final GeneratedColumn<String> videoExtension = GeneratedColumn<String>(
+      'video_extension', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(""));
+  static const VerificationMeta _videoDurationMillisMeta =
+      const VerificationMeta('videoDurationMillis');
+  @override
+  late final GeneratedColumn<int> videoDurationMillis = GeneratedColumn<int>(
+      'video_duration_millis', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isEnableMeta =
+      const VerificationMeta('isEnable');
+  @override
+  late final GeneratedColumn<bool> isEnable =
+      GeneratedColumn<bool>('is_enable', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("is_enable" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }),
+          defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, title, videoExtension, videoDurationMillis, isEnable, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'video_info_list';
+  @override
+  String get actualTableName => 'video_info_list';
+  @override
+  VerificationContext validateIntegrity(Insertable<VideoInfo> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('video_extension')) {
+      context.handle(
+          _videoExtensionMeta,
+          videoExtension.isAcceptableOrUnknown(
+              data['video_extension']!, _videoExtensionMeta));
+    }
+    if (data.containsKey('video_duration_millis')) {
+      context.handle(
+          _videoDurationMillisMeta,
+          videoDurationMillis.isAcceptableOrUnknown(
+              data['video_duration_millis']!, _videoDurationMillisMeta));
+    }
+    if (data.containsKey('is_enable')) {
+      context.handle(_isEnableMeta,
+          isEnable.isAcceptableOrUnknown(data['is_enable']!, _isEnableMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VideoInfo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VideoInfo(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      videoExtension: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}video_extension'])!,
+      videoDurationMillis: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}video_duration_millis'])!,
+      isEnable: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_enable'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
+    );
+  }
+
+  @override
+  $VideoInfoListTable createAlias(String alias) {
+    return $VideoInfoListTable(attachedDatabase, alias);
+  }
+}
+
+class VideoInfo extends DataClass implements Insertable<VideoInfo> {
+  final int id;
+  final String title;
+  final String videoExtension;
+  final int videoDurationMillis;
+  final bool isEnable;
+  final DateTime? createdAt;
+  const VideoInfo(
+      {required this.id,
+      required this.title,
+      required this.videoExtension,
+      required this.videoDurationMillis,
+      required this.isEnable,
+      this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['video_extension'] = Variable<String>(videoExtension);
+    map['video_duration_millis'] = Variable<int>(videoDurationMillis);
+    map['is_enable'] = Variable<bool>(isEnable);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    return map;
+  }
+
+  VideoInfoListCompanion toCompanion(bool nullToAbsent) {
+    return VideoInfoListCompanion(
+      id: Value(id),
+      title: Value(title),
+      videoExtension: Value(videoExtension),
+      videoDurationMillis: Value(videoDurationMillis),
+      isEnable: Value(isEnable),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+    );
+  }
+
+  factory VideoInfo.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VideoInfo(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      videoExtension: serializer.fromJson<String>(json['videoExtension']),
+      videoDurationMillis:
+          serializer.fromJson<int>(json['videoDurationMillis']),
+      isEnable: serializer.fromJson<bool>(json['isEnable']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'videoExtension': serializer.toJson<String>(videoExtension),
+      'videoDurationMillis': serializer.toJson<int>(videoDurationMillis),
+      'isEnable': serializer.toJson<bool>(isEnable),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+    };
+  }
+
+  VideoInfo copyWith(
+          {int? id,
+          String? title,
+          String? videoExtension,
+          int? videoDurationMillis,
+          bool? isEnable,
+          Value<DateTime?> createdAt = const Value.absent()}) =>
+      VideoInfo(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        videoExtension: videoExtension ?? this.videoExtension,
+        videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
+        isEnable: isEnable ?? this.isEnable,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('VideoInfo(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('videoExtension: $videoExtension, ')
+          ..write('videoDurationMillis: $videoDurationMillis, ')
+          ..write('isEnable: $isEnable, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, title, videoExtension, videoDurationMillis, isEnable, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VideoInfo &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.videoExtension == this.videoExtension &&
+          other.videoDurationMillis == this.videoDurationMillis &&
+          other.isEnable == this.isEnable &&
+          other.createdAt == this.createdAt);
+}
+
+class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<String> videoExtension;
+  final Value<int> videoDurationMillis;
+  final Value<bool> isEnable;
+  final Value<DateTime?> createdAt;
+  const VideoInfoListCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.videoExtension = const Value.absent(),
+    this.videoDurationMillis = const Value.absent(),
+    this.isEnable = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  VideoInfoListCompanion.insert({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.videoExtension = const Value.absent(),
+    this.videoDurationMillis = const Value.absent(),
+    this.isEnable = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  static Insertable<VideoInfo> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<String>? videoExtension,
+    Expression<int>? videoDurationMillis,
+    Expression<bool>? isEnable,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (videoExtension != null) 'video_extension': videoExtension,
+      if (videoDurationMillis != null)
+        'video_duration_millis': videoDurationMillis,
+      if (isEnable != null) 'is_enable': isEnable,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  VideoInfoListCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? title,
+      Value<String>? videoExtension,
+      Value<int>? videoDurationMillis,
+      Value<bool>? isEnable,
+      Value<DateTime?>? createdAt}) {
+    return VideoInfoListCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      videoExtension: videoExtension ?? this.videoExtension,
+      videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
+      isEnable: isEnable ?? this.isEnable,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (videoExtension.present) {
+      map['video_extension'] = Variable<String>(videoExtension.value);
+    }
+    if (videoDurationMillis.present) {
+      map['video_duration_millis'] = Variable<int>(videoDurationMillis.value);
+    }
+    if (isEnable.present) {
+      map['is_enable'] = Variable<bool>(isEnable.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VideoInfoListCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('videoExtension: $videoExtension, ')
+          ..write('videoDurationMillis: $videoDurationMillis, ')
+          ..write('isEnable: $isEnable, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $VideoCategoriesTable extends VideoCategories
     with TableInfo<$VideoCategoriesTable, VideoCategory> {
   @override
@@ -22,9 +355,7 @@ class $VideoCategoriesTable extends VideoCategories
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, name];
   @override
@@ -176,12 +507,12 @@ class VideoCategoriesCompanion extends UpdateCompanion<VideoCategory> {
   }
 }
 
-class $VideoInfoListTable extends VideoInfoList
-    with TableInfo<$VideoInfoListTable, VideoInfo> {
+class $VideoCategorizationsTable extends VideoCategorizations
+    with TableInfo<$VideoCategorizationsTable, VideoCategorization> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $VideoInfoListTable(this.attachedDatabase, [this._alias]);
+  $VideoCategorizationsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -191,106 +522,54 @@ class $VideoInfoListTable extends VideoInfoList
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  static const VerificationMeta _videoInfoIdMeta =
+      const VerificationMeta('videoInfoId');
   @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(""));
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
-  @override
-  late final GeneratedColumn<int> category = GeneratedColumn<int>(
-      'category', aliasedName, true,
+  late final GeneratedColumn<int> videoInfoId = GeneratedColumn<int>(
+      'video_info_id', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES video_info_list (id)'));
+  static const VerificationMeta _videoCategoryIdMeta =
+      const VerificationMeta('videoCategoryId');
+  @override
+  late final GeneratedColumn<int> videoCategoryId = GeneratedColumn<int>(
+      'video_category_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES video_categories (id)'));
-  static const VerificationMeta _videoExtensionMeta =
-      const VerificationMeta('videoExtension');
   @override
-  late final GeneratedColumn<String> videoExtension = GeneratedColumn<String>(
-      'video_extension', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(""));
-  static const VerificationMeta _videoDurationMillisMeta =
-      const VerificationMeta('videoDurationMillis');
+  List<GeneratedColumn> get $columns => [id, videoInfoId, videoCategoryId];
   @override
-  late final GeneratedColumn<int> videoDurationMillis = GeneratedColumn<int>(
-      'video_duration_millis', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _isEnableMeta =
-      const VerificationMeta('isEnable');
+  String get aliasedName => _alias ?? 'video_categorizations';
   @override
-  late final GeneratedColumn<bool> isEnable =
-      GeneratedColumn<bool>('is_enable', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("is_enable" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+  String get actualTableName => 'video_categorizations';
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        title,
-        category,
-        videoExtension,
-        videoDurationMillis,
-        isEnable,
-        createdAt
-      ];
-  @override
-  String get aliasedName => _alias ?? 'video_info_list';
-  @override
-  String get actualTableName => 'video_info_list';
-  @override
-  VerificationContext validateIntegrity(Insertable<VideoInfo> instance,
+  VerificationContext validateIntegrity(
+      Insertable<VideoCategorization> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('title')) {
+    if (data.containsKey('video_info_id')) {
       context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+          _videoInfoIdMeta,
+          videoInfoId.isAcceptableOrUnknown(
+              data['video_info_id']!, _videoInfoIdMeta));
+    } else if (isInserting) {
+      context.missing(_videoInfoIdMeta);
     }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    }
-    if (data.containsKey('video_extension')) {
+    if (data.containsKey('video_category_id')) {
       context.handle(
-          _videoExtensionMeta,
-          videoExtension.isAcceptableOrUnknown(
-              data['video_extension']!, _videoExtensionMeta));
-    }
-    if (data.containsKey('video_duration_millis')) {
-      context.handle(
-          _videoDurationMillisMeta,
-          videoDurationMillis.isAcceptableOrUnknown(
-              data['video_duration_millis']!, _videoDurationMillisMeta));
-    }
-    if (data.containsKey('is_enable')) {
-      context.handle(_isEnableMeta,
-          isEnable.isAcceptableOrUnknown(data['is_enable']!, _isEnableMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+          _videoCategoryIdMeta,
+          videoCategoryId.isAcceptableOrUnknown(
+              data['video_category_id']!, _videoCategoryIdMeta));
+    } else if (isInserting) {
+      context.missing(_videoCategoryIdMeta);
     }
     return context;
   }
@@ -298,93 +577,57 @@ class $VideoInfoListTable extends VideoInfoList
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  VideoInfo map(Map<String, dynamic> data, {String? tablePrefix}) {
+  VideoCategorization map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return VideoInfo(
+    return VideoCategorization(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}category']),
-      videoExtension: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}video_extension'])!,
-      videoDurationMillis: attachedDatabase.typeMapping.read(
-          DriftSqlType.int, data['${effectivePrefix}video_duration_millis'])!,
-      isEnable: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_enable'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
+      videoInfoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}video_info_id'])!,
+      videoCategoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}video_category_id'])!,
     );
   }
 
   @override
-  $VideoInfoListTable createAlias(String alias) {
-    return $VideoInfoListTable(attachedDatabase, alias);
+  $VideoCategorizationsTable createAlias(String alias) {
+    return $VideoCategorizationsTable(attachedDatabase, alias);
   }
 }
 
-class VideoInfo extends DataClass implements Insertable<VideoInfo> {
+class VideoCategorization extends DataClass
+    implements Insertable<VideoCategorization> {
   final int id;
-  final String title;
-  final int? category;
-  final String videoExtension;
-  final int videoDurationMillis;
-  final bool isEnable;
-  final DateTime? createdAt;
-  const VideoInfo(
+  final int videoInfoId;
+  final int videoCategoryId;
+  const VideoCategorization(
       {required this.id,
-      required this.title,
-      this.category,
-      required this.videoExtension,
-      required this.videoDurationMillis,
-      required this.isEnable,
-      this.createdAt});
+      required this.videoInfoId,
+      required this.videoCategoryId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['title'] = Variable<String>(title);
-    if (!nullToAbsent || category != null) {
-      map['category'] = Variable<int>(category);
-    }
-    map['video_extension'] = Variable<String>(videoExtension);
-    map['video_duration_millis'] = Variable<int>(videoDurationMillis);
-    map['is_enable'] = Variable<bool>(isEnable);
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
-    }
+    map['video_info_id'] = Variable<int>(videoInfoId);
+    map['video_category_id'] = Variable<int>(videoCategoryId);
     return map;
   }
 
-  VideoInfoListCompanion toCompanion(bool nullToAbsent) {
-    return VideoInfoListCompanion(
+  VideoCategorizationsCompanion toCompanion(bool nullToAbsent) {
+    return VideoCategorizationsCompanion(
       id: Value(id),
-      title: Value(title),
-      category: category == null && nullToAbsent
-          ? const Value.absent()
-          : Value(category),
-      videoExtension: Value(videoExtension),
-      videoDurationMillis: Value(videoDurationMillis),
-      isEnable: Value(isEnable),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
+      videoInfoId: Value(videoInfoId),
+      videoCategoryId: Value(videoCategoryId),
     );
   }
 
-  factory VideoInfo.fromJson(Map<String, dynamic> json,
+  factory VideoCategorization.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return VideoInfo(
+    return VideoCategorization(
       id: serializer.fromJson<int>(json['id']),
-      title: serializer.fromJson<String>(json['title']),
-      category: serializer.fromJson<int?>(json['category']),
-      videoExtension: serializer.fromJson<String>(json['videoExtension']),
-      videoDurationMillis:
-          serializer.fromJson<int>(json['videoDurationMillis']),
-      isEnable: serializer.fromJson<bool>(json['isEnable']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      videoInfoId: serializer.fromJson<int>(json['videoInfoId']),
+      videoCategoryId: serializer.fromJson<int>(json['videoCategoryId']),
     );
   }
   @override
@@ -392,125 +635,73 @@ class VideoInfo extends DataClass implements Insertable<VideoInfo> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'title': serializer.toJson<String>(title),
-      'category': serializer.toJson<int?>(category),
-      'videoExtension': serializer.toJson<String>(videoExtension),
-      'videoDurationMillis': serializer.toJson<int>(videoDurationMillis),
-      'isEnable': serializer.toJson<bool>(isEnable),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'videoInfoId': serializer.toJson<int>(videoInfoId),
+      'videoCategoryId': serializer.toJson<int>(videoCategoryId),
     };
   }
 
-  VideoInfo copyWith(
-          {int? id,
-          String? title,
-          Value<int?> category = const Value.absent(),
-          String? videoExtension,
-          int? videoDurationMillis,
-          bool? isEnable,
-          Value<DateTime?> createdAt = const Value.absent()}) =>
-      VideoInfo(
+  VideoCategorization copyWith(
+          {int? id, int? videoInfoId, int? videoCategoryId}) =>
+      VideoCategorization(
         id: id ?? this.id,
-        title: title ?? this.title,
-        category: category.present ? category.value : this.category,
-        videoExtension: videoExtension ?? this.videoExtension,
-        videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
-        isEnable: isEnable ?? this.isEnable,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        videoInfoId: videoInfoId ?? this.videoInfoId,
+        videoCategoryId: videoCategoryId ?? this.videoCategoryId,
       );
   @override
   String toString() {
-    return (StringBuffer('VideoInfo(')
+    return (StringBuffer('VideoCategorization(')
           ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('category: $category, ')
-          ..write('videoExtension: $videoExtension, ')
-          ..write('videoDurationMillis: $videoDurationMillis, ')
-          ..write('isEnable: $isEnable, ')
-          ..write('createdAt: $createdAt')
+          ..write('videoInfoId: $videoInfoId, ')
+          ..write('videoCategoryId: $videoCategoryId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, category, videoExtension,
-      videoDurationMillis, isEnable, createdAt);
+  int get hashCode => Object.hash(id, videoInfoId, videoCategoryId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is VideoInfo &&
+      (other is VideoCategorization &&
           other.id == this.id &&
-          other.title == this.title &&
-          other.category == this.category &&
-          other.videoExtension == this.videoExtension &&
-          other.videoDurationMillis == this.videoDurationMillis &&
-          other.isEnable == this.isEnable &&
-          other.createdAt == this.createdAt);
+          other.videoInfoId == this.videoInfoId &&
+          other.videoCategoryId == this.videoCategoryId);
 }
 
-class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
+class VideoCategorizationsCompanion
+    extends UpdateCompanion<VideoCategorization> {
   final Value<int> id;
-  final Value<String> title;
-  final Value<int?> category;
-  final Value<String> videoExtension;
-  final Value<int> videoDurationMillis;
-  final Value<bool> isEnable;
-  final Value<DateTime?> createdAt;
-  const VideoInfoListCompanion({
+  final Value<int> videoInfoId;
+  final Value<int> videoCategoryId;
+  const VideoCategorizationsCompanion({
     this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.category = const Value.absent(),
-    this.videoExtension = const Value.absent(),
-    this.videoDurationMillis = const Value.absent(),
-    this.isEnable = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.videoInfoId = const Value.absent(),
+    this.videoCategoryId = const Value.absent(),
   });
-  VideoInfoListCompanion.insert({
+  VideoCategorizationsCompanion.insert({
     this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.category = const Value.absent(),
-    this.videoExtension = const Value.absent(),
-    this.videoDurationMillis = const Value.absent(),
-    this.isEnable = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  static Insertable<VideoInfo> custom({
+    required int videoInfoId,
+    required int videoCategoryId,
+  })  : videoInfoId = Value(videoInfoId),
+        videoCategoryId = Value(videoCategoryId);
+  static Insertable<VideoCategorization> custom({
     Expression<int>? id,
-    Expression<String>? title,
-    Expression<int>? category,
-    Expression<String>? videoExtension,
-    Expression<int>? videoDurationMillis,
-    Expression<bool>? isEnable,
-    Expression<DateTime>? createdAt,
+    Expression<int>? videoInfoId,
+    Expression<int>? videoCategoryId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (title != null) 'title': title,
-      if (category != null) 'category': category,
-      if (videoExtension != null) 'video_extension': videoExtension,
-      if (videoDurationMillis != null)
-        'video_duration_millis': videoDurationMillis,
-      if (isEnable != null) 'is_enable': isEnable,
-      if (createdAt != null) 'created_at': createdAt,
+      if (videoInfoId != null) 'video_info_id': videoInfoId,
+      if (videoCategoryId != null) 'video_category_id': videoCategoryId,
     });
   }
 
-  VideoInfoListCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? title,
-      Value<int?>? category,
-      Value<String>? videoExtension,
-      Value<int>? videoDurationMillis,
-      Value<bool>? isEnable,
-      Value<DateTime?>? createdAt}) {
-    return VideoInfoListCompanion(
+  VideoCategorizationsCompanion copyWith(
+      {Value<int>? id, Value<int>? videoInfoId, Value<int>? videoCategoryId}) {
+    return VideoCategorizationsCompanion(
       id: id ?? this.id,
-      title: title ?? this.title,
-      category: category ?? this.category,
-      videoExtension: videoExtension ?? this.videoExtension,
-      videoDurationMillis: videoDurationMillis ?? this.videoDurationMillis,
-      isEnable: isEnable ?? this.isEnable,
-      createdAt: createdAt ?? this.createdAt,
+      videoInfoId: videoInfoId ?? this.videoInfoId,
+      videoCategoryId: videoCategoryId ?? this.videoCategoryId,
     );
   }
 
@@ -520,37 +711,21 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
+    if (videoInfoId.present) {
+      map['video_info_id'] = Variable<int>(videoInfoId.value);
     }
-    if (category.present) {
-      map['category'] = Variable<int>(category.value);
-    }
-    if (videoExtension.present) {
-      map['video_extension'] = Variable<String>(videoExtension.value);
-    }
-    if (videoDurationMillis.present) {
-      map['video_duration_millis'] = Variable<int>(videoDurationMillis.value);
-    }
-    if (isEnable.present) {
-      map['is_enable'] = Variable<bool>(isEnable.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (videoCategoryId.present) {
+      map['video_category_id'] = Variable<int>(videoCategoryId.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('VideoInfoListCompanion(')
+    return (StringBuffer('VideoCategorizationsCompanion(')
           ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('category: $category, ')
-          ..write('videoExtension: $videoExtension, ')
-          ..write('videoDurationMillis: $videoDurationMillis, ')
-          ..write('isEnable: $isEnable, ')
-          ..write('createdAt: $createdAt')
+          ..write('videoInfoId: $videoInfoId, ')
+          ..write('videoCategoryId: $videoCategoryId')
           ..write(')'))
         .toString();
   }
@@ -558,13 +733,15 @@ class VideoInfoListCompanion extends UpdateCompanion<VideoInfo> {
 
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
+  late final $VideoInfoListTable videoInfoList = $VideoInfoListTable(this);
   late final $VideoCategoriesTable videoCategories =
       $VideoCategoriesTable(this);
-  late final $VideoInfoListTable videoInfoList = $VideoInfoListTable(this);
+  late final $VideoCategorizationsTable videoCategorizations =
+      $VideoCategorizationsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [videoCategories, videoInfoList];
+      [videoInfoList, videoCategories, videoCategorizations];
 }

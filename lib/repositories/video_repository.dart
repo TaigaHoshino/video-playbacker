@@ -69,7 +69,7 @@ class VideoRepository {
                             manifest.audioOnly.withHighestBitrate().size.totalBytes);
 
     // この先の処理に失敗した時に備えて一旦データを保存する(処理に失敗したデータを削除するために必要)
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, 0, false, DateTime.now());
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, 0, false, DateTime.now());
 
     if(!await _muxVideoAndAudio(outputVideoPath, videoTmpPath, audioTmpPath)){
       throw Exception('Failed to mux video and audio');
@@ -94,7 +94,7 @@ class VideoRepository {
       throw Exception('Failed to create thumbnail');
     }
 
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, null, videoExtension, duration, true, DateTime.now());
+    _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, duration, true, DateTime.now());
     return _createVideoBy(videoInfo);
   }
 
@@ -112,7 +112,7 @@ class VideoRepository {
   }
 
   Future<void> deleteVideo(dto_video.Video video) async {
-    _database.updateVideoInfo(video.id, video.title, video.category?.id, false);
+    _database.updateVideoInfo(video.id, video.title, false);
 
     try{
       await _deleteFile(video.videoPath);
