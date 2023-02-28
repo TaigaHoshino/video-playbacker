@@ -1,30 +1,27 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:video_playbacker/dtos/loading_state.dart';
-import 'package:video_playbacker/dtos/video.dart';
-import 'package:video_playbacker/screens/video_player_handler.dart';
-import 'package:video_playbacker/screens/video_player_screen.dart';
+import 'package:video_playbacker/screens/videolist_screen.dart';
 
 import '../blocs/app_bloc.dart';
+import '../dtos/loading_state.dart';
 import '../dtos/video_category.dart';
 
-class VideoListScreen extends StatelessWidget{
-  final VideoCategory? videoCategory;
-
-  const VideoListScreen({Key? key, this.videoCategory}): super(key: key);
-
+class VideoCategoryListScreen extends StatelessWidget {
+  const VideoCategoryListScreen({Key? key}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     final appBloc = GetIt.I<AppBloc>();
 
-    appBloc.getVideos(videoCategory: videoCategory);
+    appBloc.getAllVideoCategories();
 
     return Scaffold(
-      body: 
-        StreamBuilder<LoadingState<List<Video>>>(
-          stream: appBloc.videoList,
+      body: ListView(children: [
+        ListTile(title: const Text('すべてのビデオ'),
+          onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const VideoListScreen()));}
+        ),
+        StreamBuilder<LoadingState<List<VideoCategory>>>(
+          stream: appBloc.videoCategoryList,
           builder: (context, snapshot){
             Widget widget = const Text("");
 
@@ -35,12 +32,13 @@ class VideoListScreen extends StatelessWidget{
             snapshot.data!.when(
               loading: (_, __) => {},
               completed: ((content) => {
-                GetIt.I<VideoPlayerHandler>().setPlayList(content),
                 widget = ListView.builder(
                   itemCount: content.length,
                   itemBuilder: (context, index) {
-                    return VideoListItemsWidget(video: content.elementAt(index));
-                  }
+                    return VideoCategoryListItemWidget(videoCategory: content.elementAt(index));
+                  },
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
                   )
               }),
               error: ((_) {
@@ -49,15 +47,17 @@ class VideoListScreen extends StatelessWidget{
             return widget;
           }
         )
+      ],)
+        
       );
   }
 }
 
-class VideoListItemsWidget extends StatelessWidget {
+class VideoCategoryListItemWidget extends StatelessWidget {
 
-  final Video video;
+  final VideoCategory videoCategory;
 
-  const VideoListItemsWidget({Key? key, required this.video}): super(key: key);
+  const VideoCategoryListItemWidget({Key? key, required this.videoCategory}): super(key: key);
   
   @override
   Widget build(BuildContext context) {
@@ -65,21 +65,7 @@ class VideoListItemsWidget extends StatelessWidget {
     final appBloc = GetIt.I<AppBloc>();
 
     return ListTile(
-      title: Text(video.title, overflow: TextOverflow.ellipsis),
-      subtitle: Text(video.createdAt.toString(), overflow: TextOverflow.ellipsis),
-      leading: Container(width:100, height: 100,
-        decoration: const BoxDecoration(color: Colors.black), child: Stack(
-        children: <Widget>[
-          Image.file(File(video.thumbnailPath)),
-          Container(
-            margin: const EdgeInsets.all(3),
-            child: 
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(video.durationString, style: const TextStyle(color: Colors.white, backgroundColor: Colors.black), textScaleFactor: 0.8)
-              ))
-        ]),
-      ),
+      title: Text(videoCategory.name, overflow: TextOverflow.ellipsis),
       trailing: PopupMenuButton<int>(
           onSelected: ((value) {
             switch(value) {
@@ -90,7 +76,7 @@ class VideoListItemsWidget extends StatelessWidget {
                 showDialog(context: context, builder: (context) {
                   return AlertDialog(
                     title: const Text("確認"),
-                    content: Text('タイトル:"${video.title}"を削除します。本当にいいですか?'),
+                    content: Text('カテゴリ:"${videoCategory.name}"を削除します。本当にいいですか?'),
                     actions: <Widget>[
                       TextButton(
                         child: const Text('いいえ'),
@@ -101,7 +87,7 @@ class VideoListItemsWidget extends StatelessWidget {
                       TextButton(
                         child: const Text('はい'),
                         onPressed: () {
-                          appBloc.deleteVideo(video);
+                          appBloc.deleteVideoCategory(videoCategory);
                           Navigator.pop(context);
                         },
                       )
@@ -123,8 +109,7 @@ class VideoListItemsWidget extends StatelessWidget {
           ]
         ),
       onTap: () {
-        GetIt.I<VideoPlayerHandler>().moveToTargetVideo(video.id);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => VideoListScreen(videoCategory: videoCategory)));
       }
     );
   }

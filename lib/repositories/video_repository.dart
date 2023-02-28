@@ -8,6 +8,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../databases/database.dart';
 import '../dtos/video.dart' as dto_video;
+import '../dtos/video_category.dart' as dto_category;
 
 class VideoRepository {
   final _database = Database();
@@ -146,7 +147,14 @@ class VideoRepository {
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
     String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
     String thumbnailPath = '$_docDirPath/$_thumbnailFolder/${videoInfo.id}.jpg';
-    return dto_video.Video(videoInfo.id, videoInfo.title, null, videoInfo.videoDurationMillis, videoInfo.createdAt ?? DateTime.now(), videoPath, thumbnailPath);
+
+    List<dto_category.VideoCategory> videoCategories = [];
+    
+    for(final videoCategoryEntity in await _database.getVideoCategoriesByVideoInfoId(videoInfo.id)) {
+      videoCategories.add(dto_category.VideoCategory(videoCategoryEntity.id, videoCategoryEntity.name));
+    }
+
+    return dto_video.Video(videoInfo.id, videoInfo.title, videoCategories, videoInfo.videoDurationMillis, videoInfo.createdAt ?? DateTime.now(), videoPath, thumbnailPath);
   }
 
   Future<void> _writeStreamToFile(String targetPath ,Stream<List<int>> stream, int length) async {

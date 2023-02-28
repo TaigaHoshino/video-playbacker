@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:video_playbacker/dtos/loading_state.dart';
 
 import '../dtos/video.dart';
+import '../dtos/video_category.dart';
 import '../repositories/video_repository.dart';
 
 class AppBloc{
-  final _videoRepository;
+  final VideoRepository _videoRepository;
 
   final _saveVideoProgressController = BehaviorSubject<LoadingState<Video>>();
 
@@ -17,6 +17,10 @@ class AppBloc{
   final _videoListController = BehaviorSubject<LoadingState<List<Video>>>.seeded(const LoadingState.completed([]));
 
   Stream<LoadingState<List<Video>>> get videoList => _videoListController.stream;
+
+  final _videoCategoryListController = BehaviorSubject<LoadingState<List<VideoCategory>>>.seeded(const LoadingState.completed([]));
+
+  Stream<LoadingState<List<VideoCategory>>> get videoCategoryList => _videoCategoryListController.stream;
 
   AppBloc(VideoRepository videoRepository): _videoRepository = videoRepository;
 
@@ -36,7 +40,8 @@ class AppBloc{
     }
   }
 
-  Future<void> getAllVideos() async{
+  // ビデオカテゴリを指定しない場合、全てのビデオを取得する
+  Future<void> getVideos({VideoCategory? videoCategory}) async{
     _videoListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideos()) );
   }
 
@@ -49,11 +54,20 @@ class AppBloc{
       print(e);
     }
 
-    getAllVideos();
+    getVideos();
+  }
+
+  Future<void> getAllVideoCategories() async {
+    // TODO: いずれ実装する
+  }
+
+  Future<void> deleteVideoCategory(VideoCategory category) async {
+    // TODO: いずれ実装する
   }
 
   void dispose(){
     _saveVideoProgressController.close();
     _videoListController.close();
+    _videoCategoryListController.close();
   }
 }

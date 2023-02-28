@@ -91,6 +91,16 @@ class Database extends _$Database {
     return await (select(videoCategories).get());
   }
 
+  Future<List<VideoCategory>> getVideoCategoriesByVideoInfoId(int videoInfoId) async {
+    List<VideoCategory> categories = [];
+
+    for(final categorization in await (select(videoCategorizations)..where((tbl) => tbl.videoInfoId.equals(videoInfoId))).get()) {  
+      categories.add(await (select(videoCategories)..where((tbl) => tbl.id.equals(categorization.videoCategoryId))).getSingle());
+    }
+
+    return categories;
+  }
+
   Future<int> updateVideoCategory(int id, String name) async {
     return await (update(videoCategories)..where((tbl) => tbl.id.equals(id))).write(VideoCategoriesCompanion(
       name: Value(name)

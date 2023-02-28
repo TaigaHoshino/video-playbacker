@@ -2,7 +2,7 @@ import 'package:video_playbacker/dtos/video_category.dart';
 
 class Video {
   final int id;
-  VideoCategory? category;
+  List<VideoCategory> videoCategories;
   String title = "";
   final int videoDurationMillis;
   DateTime createdAt;
@@ -24,5 +24,5 @@ class Video {
     }
   }
 
-  Video(this.id, this.title, this.category, this.videoDurationMillis, this.createdAt, this.videoPath, this.thumbnailPath);
+  Video(this.id, this.title, this.videoCategories, this.videoDurationMillis, this.createdAt, this.videoPath, this.thumbnailPath);
 }
