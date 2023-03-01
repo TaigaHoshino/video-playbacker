@@ -53,16 +53,18 @@ class AppBloc{
     catch (e) {
       print(e);
     }
+  }
 
-    getVideos();
+  Future<void> addVideoCategory(String name) async {
+    await _videoRepository.addVideoCategory(name);
   }
 
   Future<void> getAllVideoCategories() async {
-    // TODO: いずれ実装する
+    _videoCategoryListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideoCategory()));
   }
 
   Future<void> deleteVideoCategory(VideoCategory category) async {
-    // TODO: いずれ実装する
+    await _videoRepository.deleteVideoCategory(category);
   }
 
   void dispose(){

@@ -102,6 +102,8 @@ class VideoListItemsWidget extends StatelessWidget {
                         child: const Text('はい'),
                         onPressed: () {
                           appBloc.deleteVideo(video);
+                          // TODO: ビデオを削除後にカテゴリ別のビデオリストをロードすること
+                          appBloc.getVideos();
                           Navigator.pop(context);
                         },
                       )

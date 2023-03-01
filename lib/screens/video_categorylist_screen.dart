@@ -16,6 +16,41 @@ class VideoCategoryListScreen extends StatelessWidget {
     appBloc.getAllVideoCategories();
 
     return Scaffold(
+      appBar: AppBar(actions: [
+        IconButton(onPressed: () {
+          String text = "";
+          showDialog(context: context, builder: (context) {
+            return AlertDialog(
+              title: const Text("カテゴリの追加"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                const Text("カテゴリ名："),
+                TextField(onChanged: (value) {
+                  text = value;
+                })
+              ],),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('キャンセル'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: const Text('追加'),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await appBloc.addVideoCategory(text);
+                    await appBloc.getAllVideoCategories();
+                  },
+                )
+              ],
+            );
+          });
+        }, icon: const Icon(Icons.add))
+        ],),
       body: ListView(children: [
         ListTile(title: const Text('すべてのビデオ'),
           onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const VideoListScreen()));}
@@ -47,9 +82,8 @@ class VideoCategoryListScreen extends StatelessWidget {
             return widget;
           }
         )
-      ],)
-        
-      );
+      ],)   
+    );
   }
 }
 
@@ -86,9 +120,10 @@ class VideoCategoryListItemWidget extends StatelessWidget {
                       ),
                       TextButton(
                         child: const Text('はい'),
-                        onPressed: () {
-                          appBloc.deleteVideoCategory(videoCategory);
+                        onPressed: () async {
                           Navigator.pop(context);
+                          await appBloc.deleteVideoCategory(videoCategory);
+                          await appBloc.getAllVideoCategories();
                         },
                       )
                     ],

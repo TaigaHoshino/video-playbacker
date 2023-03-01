@@ -70,7 +70,7 @@ class VideoRepository {
                             manifest.audioOnly.withHighestBitrate().size.totalBytes);
 
     // この先の処理に失敗した時に備えて一旦データを保存する(処理に失敗したデータを削除するために必要)
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, 0, false, DateTime.now());
+    await _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, 0, false, DateTime.now());
 
     if(!await _muxVideoAndAudio(outputVideoPath, videoTmpPath, audioTmpPath)){
       throw Exception('Failed to mux video and audio');
@@ -95,7 +95,7 @@ class VideoRepository {
       throw Exception('Failed to create thumbnail');
     }
 
-    _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, duration, true, DateTime.now());
+    await _database.saveVideoInfo(videoInfo.id, videoInfo.title, videoExtension, duration, true, DateTime.now());
     return _createVideoBy(videoInfo);
   }
 
@@ -113,7 +113,7 @@ class VideoRepository {
   }
 
   Future<void> deleteVideo(dto_video.Video video) async {
-    _database.updateVideoInfo(video.id, video.title, false);
+    await _database.updateVideoInfo(video.id, video.title, false);
 
     try{
       await _deleteFile(video.videoPath);
@@ -141,8 +141,26 @@ class VideoRepository {
       }
     }
 
-    _database.deleteVideoInfo(video.id);
+    await _database.deleteVideoInfo(video.id);
   } 
+
+  Future<void> addVideoCategory(String name) async{
+    await _database.createNewVideoCategory(name);
+  }
+
+  Future<List<dto_category.VideoCategory>> getAllVideoCategory() async {   
+    List<dto_category.VideoCategory> videoCategories = [];
+    
+    for(final videoCategoryEntity in await _database.getAllVideoCategory()) {
+      videoCategories.add(dto_category.VideoCategory(videoCategoryEntity.id, videoCategoryEntity.name));
+    }
+
+    return videoCategories;
+  }
+
+  Future<void> deleteVideoCategory(dto_category.VideoCategory videoCategory) async {
+    await _database.deleteVideoCategory(videoCategory.id);
+  }
 
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
     String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
