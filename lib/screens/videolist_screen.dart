@@ -1,14 +1,15 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 import 'package:video_playbacker/dtos/video.dart';
+import 'package:video_playbacker/screens/popupmenu_button_builder.dart';
+import 'package:video_playbacker/screens/video_categorization_screen.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_playbacker/screens/video_player_screen.dart';
 
 import '../blocs/app_bloc.dart';
 import '../dtos/video_category.dart';
+import 'videolist_item_widget.dart';
 
 class VideoListScreen extends StatelessWidget{
   final VideoCategory? videoCategory;
@@ -22,6 +23,15 @@ class VideoListScreen extends StatelessWidget{
     appBloc.getVideos(videoCategory: videoCategory);
 
     return Scaffold(
+      appBar: AppBar(title: Text(videoCategory?.name ?? "すべてのビデオ"),
+                     actions: videoCategory != null ? [IconButton(onPressed: (){
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoCategorizationScreen(videoCategory: videoCategory!,)))
+                      .then((value) => {
+                        appBloc.getVideos(videoCategory: videoCategory)
+                      });
+                     }, icon: const Icon(Icons.add))] : null,
+                     leading: IconButton(icon: const Icon(Icons.arrow_back),
+                     onPressed: () {Navigator.pop(context);},)),
       body: 
         StreamBuilder<LoadingState<List<Video>>>(
           stream: appBloc.videoList,
@@ -39,9 +49,50 @@ class VideoListScreen extends StatelessWidget{
                 widget = ListView.builder(
                   itemCount: content.length,
                   itemBuilder: (context, index) {
-                    return VideoListItemsWidget(video: content.elementAt(index));
+                    final video = content.elementAt(index);
+
+                    final popupMenuButtonBuilder = PopupMenuButtonBuilder();
+                    popupMenuButtonBuilder.addMenu(const Text('編集'), () {});
+                    if(videoCategory != null){
+                      popupMenuButtonBuilder.addMenu(const Text('カテゴリから除外'), () {});
+                    }
+                    popupMenuButtonBuilder.addMenu(const Text('削除', style: TextStyle(color: Colors.red)),
+                                                   () {
+                                                    showDialog(context: context, builder: (context) {
+                                                      return AlertDialog(
+                                                        title: const Text("確認"),
+                                                        content: Text('タイトル:"${video.title}"を削除します。本当にいいですか?'),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            child: const Text('いいえ'),
+                                                            onPressed: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                          ),
+                                                          TextButton(
+                                                            child: const Text('はい'),
+                                                            onPressed: () {
+                                                              appBloc.deleteVideo(video);
+                                                              appBloc.getVideos(videoCategory: videoCategory);
+                                                              Navigator.pop(context);
+                                                            },
+                                                          )
+                                                        ],
+                                                      );
+                                                    });
+                                                   });
+
+                    return GestureDetector(
+                      child: VideoListItemsWidget(video: content.elementAt(index), videoCategory: videoCategory,
+                        popupMenuButton: popupMenuButtonBuilder.build(),
+                        onTap: () {
+                          GetIt.I<VideoPlayerHandler>().moveToTargetVideo(video.id);
+                          Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
+                        },
+                        ),
+                      );
                   }
-                  )
+                )
               }),
               error: ((_) {
                 
@@ -50,84 +101,5 @@ class VideoListScreen extends StatelessWidget{
           }
         )
       );
-  }
-}
-
-class VideoListItemsWidget extends StatelessWidget {
-
-  final Video video;
-
-  const VideoListItemsWidget({Key? key, required this.video}): super(key: key);
-  
-  @override
-  Widget build(BuildContext context) {
-
-    final appBloc = GetIt.I<AppBloc>();
-
-    return ListTile(
-      title: Text(video.title, overflow: TextOverflow.ellipsis),
-      subtitle: Text(video.createdAt.toString(), overflow: TextOverflow.ellipsis),
-      leading: Container(width:100, height: 100,
-        decoration: const BoxDecoration(color: Colors.black), child: Stack(
-        children: <Widget>[
-          Image.file(File(video.thumbnailPath)),
-          Container(
-            margin: const EdgeInsets.all(3),
-            child: 
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(video.durationString, style: const TextStyle(color: Colors.white, backgroundColor: Colors.black), textScaleFactor: 0.8)
-              ))
-        ]),
-      ),
-      trailing: PopupMenuButton<int>(
-          onSelected: ((value) {
-            switch(value) {
-              case 1:
-                // TODO: そのうち実装する
-                break;
-              case 2:
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    title: const Text("確認"),
-                    content: Text('タイトル:"${video.title}"を削除します。本当にいいですか?'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('いいえ'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: const Text('はい'),
-                        onPressed: () {
-                          appBloc.deleteVideo(video);
-                          // TODO: ビデオを削除後にカテゴリ別のビデオリストをロードすること
-                          appBloc.getVideos();
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  );
-                });
-                break;
-            }
-          }),
-          itemBuilder: (context) => <PopupMenuEntry<int>>[
-            const PopupMenuItem(
-              value: 1,
-              child: Text('編集')
-            ),
-            const PopupMenuItem(
-              value: 2,
-              child: Text('削除', style: TextStyle(color: Colors.red))
-            )
-          ]
-        ),
-      onTap: () {
-        GetIt.I<VideoPlayerHandler>().moveToTargetVideo(video.id);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(video)));
-      }
-    );
   }
 }

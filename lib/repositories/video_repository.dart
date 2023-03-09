@@ -25,7 +25,7 @@ class VideoRepository {
     final tmpDir = await getTemporaryDirectory();
     _tmpDirPath = tmpDir.path;
 
-    final videoInfoList = await _database.getVideoInfoListBy(false);
+    final videoInfoList = await _database.getVideoInfoList(false);
 
     for(final videoInfo in videoInfoList){
       final video = await _createVideoBy(videoInfo);
@@ -103,7 +103,33 @@ class VideoRepository {
 
     List<dto_video.Video> video = [];
 
-    List<VideoInfo> videoInfo = await _database.getVideoInfoListBy(true);
+    List<VideoInfo> videoInfo = await _database.getVideoInfoList(true);
+
+    for (var info in videoInfo) {
+      video.add(await _createVideoBy(info));
+    }
+
+    return video;
+  }
+
+  Future<List<dto_video.Video>> getVideosByCategory(dto_category.VideoCategory videoCategory) async {
+
+    List<dto_video.Video> video = [];
+
+    List<VideoInfo> videoInfo = await _database.getVideoInfoList(true, categoryId: videoCategory.id);
+
+    for (var info in videoInfo) {
+      video.add(await _createVideoBy(info));
+    }
+
+    return video;
+  }
+
+  Future<List<dto_video.Video>> getVideosByExcludedCategory(dto_category.VideoCategory excludedCategory) async {
+
+    List<dto_video.Video> video = [];
+
+    List<VideoInfo> videoInfo = await _database.getVideoInfoList(true, categoryId: excludedCategory.id, isCategoryExcluded: true);
 
     for (var info in videoInfo) {
       video.add(await _createVideoBy(info));

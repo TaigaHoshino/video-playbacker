@@ -62,8 +62,31 @@ class Database extends _$Database {
     );
   }
 
-  Future<List<VideoInfo>> getVideoInfoListBy(bool isEnable) async {
-    return await (select(videoInfoList)..where((tbl) => tbl.isEnable.equals(isEnable))).get();
+  Future<List<VideoInfo>> getVideoInfoList(bool isEnable, {int? categoryId, bool isCategoryExcluded = false}) async {
+
+    if(categoryId == null) {
+      return await (select(videoInfoList)..where((tbl) => tbl.isEnable.equals(isEnable))).get();
+    }
+    else if(isCategoryExcluded) {
+      final query = select(videoInfoList).join(
+        [
+          leftOuterJoin(videoCategorizations,
+                        videoCategorizations.videoInfoId.equalsExp(videoInfoList.id)),
+        ],
+      )..where(videoCategorizations.videoCategoryId.equals(categoryId).not() | videoCategorizations.videoCategoryId.isNull());
+
+      return await query.map((row) => row.readTable(videoInfoList)).get();
+    }
+    else {
+      final query = select(videoInfoList).join(
+        [
+          innerJoin(videoCategorizations,
+                    videoCategorizations.videoInfoId.equalsExp(videoInfoList.id)),
+        ],
+      )..where(videoCategorizations.videoCategoryId.equals(categoryId));
+
+      return await query.map((row) => row.readTable(videoInfoList)).get();
+    }
   }
 
   Future<void> deleteVideoInfo(int id) async {

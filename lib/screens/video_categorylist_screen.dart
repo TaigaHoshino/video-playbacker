@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:video_playbacker/screens/popupmenu_button_builder.dart';
 import 'package:video_playbacker/screens/videolist_screen.dart';
 
 import '../blocs/app_bloc.dart';
@@ -53,7 +54,7 @@ class VideoCategoryListScreen extends StatelessWidget {
         ],),
       body: ListView(children: [
         ListTile(title: const Text('すべてのビデオ'),
-          onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const VideoListScreen()));}
+          onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => VideoListScreen()));}
         ),
         StreamBuilder<LoadingState<List<VideoCategory>>>(
           stream: appBloc.videoCategoryList,
@@ -97,52 +98,37 @@ class VideoCategoryListItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final appBloc = GetIt.I<AppBloc>();
+    final popupMenuButtonBuilder = PopupMenuButtonBuilder();
+    popupMenuButtonBuilder.addMenu(const Text('編集'),
+                                   (){});
+    popupMenuButtonBuilder.addMenu(const Text('削除', style: TextStyle(color: Colors.red)),
+                                   (){
+                                    showDialog(context: context, builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text("確認"),
+                                        content: Text('カテゴリ:"${videoCategory.name}"を削除します。本当にいいですか?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('いいえ'),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text('はい'),
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              await appBloc.deleteVideoCategory(videoCategory);
+                                              await appBloc.getAllVideoCategories();
+                                            },
+                                          )
+                                        ],
+                                      );
+                                   });});
 
     return ListTile(
       title: Text(videoCategory.name, overflow: TextOverflow.ellipsis),
-      trailing: PopupMenuButton<int>(
-          onSelected: ((value) {
-            switch(value) {
-              case 1:
-                // TODO: そのうち実装する
-                break;
-              case 2:
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    title: const Text("確認"),
-                    content: Text('カテゴリ:"${videoCategory.name}"を削除します。本当にいいですか?'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('いいえ'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: const Text('はい'),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          await appBloc.deleteVideoCategory(videoCategory);
-                          await appBloc.getAllVideoCategories();
-                        },
-                      )
-                    ],
-                  );
-                });
-                break;
-            }
-          }),
-          itemBuilder: (context) => <PopupMenuEntry<int>>[
-            const PopupMenuItem(
-              value: 1,
-              child: Text('編集')
-            ),
-            const PopupMenuItem(
-              value: 2,
-              child: Text('削除', style: TextStyle(color: Colors.red))
-            )
-          ]
-        ),
+      trailing: popupMenuButtonBuilder.build(),
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => VideoListScreen(videoCategory: videoCategory)));
       }

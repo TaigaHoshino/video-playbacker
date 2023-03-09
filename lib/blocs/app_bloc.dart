@@ -41,8 +41,16 @@ class AppBloc{
   }
 
   // ビデオカテゴリを指定しない場合、全てのビデオを取得する
-  Future<void> getVideos({VideoCategory? videoCategory}) async{
-    _videoListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideos()) );
+  Future<void> getVideos({VideoCategory? videoCategory, bool isCategoryExcluded = false}) async{
+    if(videoCategory == null) {
+      _videoListController.sink.add(LoadingState.completed(await _videoRepository.getAllVideos()));
+    }
+    else if(isCategoryExcluded) {
+      _videoListController.sink.add(LoadingState.completed(await _videoRepository.getVideosByExcludedCategory(videoCategory)));
+    }
+    else {
+      _videoListController.sink.add(LoadingState.completed(await _videoRepository.getVideosByCategory(videoCategory)));
+    }
   }
 
   // 万が一削除に失敗しても次回起動時に再度削除を実施するため、削除可否のコールバックは返さない
