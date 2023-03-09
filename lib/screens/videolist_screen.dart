@@ -11,10 +11,41 @@ import '../blocs/app_bloc.dart';
 import '../dtos/video_category.dart';
 import 'videolist_item_widget.dart';
 
-class VideoListScreen extends StatelessWidget{
+class VideoListScreen extends StatefulWidget {
+  final VideoCategory? videoCategory;
+  const VideoListScreen({Key? key, this.videoCategory}) : super(key: key);
+
+  @override
+  _WarpperStatelessState createState() => _WarpperStatelessState();
+}
+
+// rootNavigator以外からrootNavigatorにwidgetをpushするとプッシュしたwidgetが更新されるバグ？があるため、statefulWidgetでラップしてこの問題を対処する
+class _WarpperStatelessState extends State<VideoListScreen> {
+  late WrappedVideoListScreen screen;
+
+  @override
+  void initState() {
+    super.initState();
+    screen = WrappedVideoListScreen(videoCategory: widget.videoCategory);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // return tabA;
+    return screen;
+  }
+
+  @override
+  void didUpdateWidget(VideoListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // setState(() {});
+  }
+}
+
+class WrappedVideoListScreen extends StatelessWidget{
   final VideoCategory? videoCategory;
 
-  const VideoListScreen({Key? key, this.videoCategory}): super(key: key);
+  const WrappedVideoListScreen({Key? key, this.videoCategory}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +56,7 @@ class VideoListScreen extends StatelessWidget{
     return Scaffold(
       appBar: AppBar(title: Text(videoCategory?.name ?? "すべてのビデオ"),
                      actions: videoCategory != null ? [IconButton(onPressed: (){
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoCategorizationScreen(videoCategory: videoCategory!,)))
+                      Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => VideoCategorizationScreen(videoCategory: videoCategory!,)))
                       .then((value) => {
                         appBloc.getVideos(videoCategory: videoCategory)
                       });
@@ -54,7 +85,30 @@ class VideoListScreen extends StatelessWidget{
                     final popupMenuButtonBuilder = PopupMenuButtonBuilder();
                     popupMenuButtonBuilder.addMenu(const Text('編集'), () {});
                     if(videoCategory != null){
-                      popupMenuButtonBuilder.addMenu(const Text('カテゴリから除外'), () {});
+                      popupMenuButtonBuilder.addMenu(const Text('カテゴリから除外'), () {
+                        showDialog(context: context, builder: (context) {
+                                                      return AlertDialog(
+                                                        title: const Text("確認"),
+                                                        content: Text('タイトル："${video.title}"を\nカテゴリ："${videoCategory!.name}"\nから除外します。本当にいいですか?'),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            child: const Text('いいえ'),
+                                                            onPressed: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                          ),
+                                                          TextButton(
+                                                            child: const Text('はい'),
+                                                            onPressed: () {
+                                                              appBloc.removeVideoCategorization(video, videoCategory!);
+                                                              appBloc.getVideos(videoCategory: videoCategory);
+                                                              Navigator.pop(context);
+                                                            },
+                                                          )
+                                                        ],
+                                                      );
+                                                    });
+                      });
                     }
                     popupMenuButtonBuilder.addMenu(const Text('削除', style: TextStyle(color: Colors.red)),
                                                    () {

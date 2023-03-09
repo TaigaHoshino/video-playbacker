@@ -188,6 +188,14 @@ class VideoRepository {
     await _database.deleteVideoCategory(videoCategory.id);
   }
 
+  Future<void> addVideoCategorization(dto_video.Video video, dto_category.VideoCategory videoCategory) async {
+    await _database.addVideoCategorization(video.id, videoCategory.id);
+  }
+
+  Future<void> removeVideoCategorization(dto_video.Video video, dto_category.VideoCategory videoCategory) async {
+    await _database.removeVideoCategorization(video.id, videoCategory.id);
+  }
+
   Future<dto_video.Video> _createVideoBy(VideoInfo videoInfo) async{
     String videoPath = '$_docDirPath/$_videoFolder/${videoInfo.id}.${videoInfo.videoExtension}';
     String thumbnailPath = '$_docDirPath/$_thumbnailFolder/${videoInfo.id}.jpg';

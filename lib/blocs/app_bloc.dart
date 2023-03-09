@@ -63,6 +63,14 @@ class AppBloc{
     }
   }
 
+  Future<void> addVideoCategorization(Video video, VideoCategory videoCategory) async {
+    await _videoRepository.addVideoCategorization(video, videoCategory);
+  }
+
+  Future<void> removeVideoCategorization(Video  video, VideoCategory videoCategory) async {
+    await _videoRepository.removeVideoCategorization(video, videoCategory);
+  }
+
   Future<void> addVideoCategory(String name) async {
     await _videoRepository.addVideoCategory(name);
   }

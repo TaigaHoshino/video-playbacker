@@ -11,7 +11,7 @@ import '../dtos/video_category.dart';
 class VideoCategorizationScreen extends StatelessWidget {
 
   final VideoCategory videoCategory;
-  final List<Video> selectedVideo = [];
+  final List<Video> _selectedVideo = [];
 
   VideoCategorizationScreen({Key? key, required this.videoCategory}): super(key: key);
 
@@ -43,11 +43,11 @@ class VideoCategorizationScreen extends StatelessWidget {
                       final video = content.elementAt(index);
                       return GestureDetector(
                         child: VideoListItemsWidget(video: video, videoCategory: videoCategory, selectedColor: Colors.blue, onTap: () {
-                          if(selectedVideo.contains(video)) {
-                            selectedVideo.remove(video);
+                          if(_selectedVideo.contains(video)) {
+                            _selectedVideo.remove(video);
                           }
                           else {
-                            selectedVideo.add(video);
+                            _selectedVideo.add(video);
                           }
                         }),
                         );
@@ -63,8 +63,11 @@ class VideoCategorizationScreen extends StatelessWidget {
         ),
         SizedBox(
           height: 50,
-          child: TextButton(onPressed: () {
-              print('button pushed');
+          child: TextButton(onPressed: () async {
+              Navigator.pop(context);
+              for(final video in _selectedVideo) {
+                await appBloc.addVideoCategorization(video, videoCategory);
+              }
             }, child: const Text('カテゴリに追加'))
         )
         
