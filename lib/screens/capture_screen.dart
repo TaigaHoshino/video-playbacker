@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/blocs/app_bloc.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
+import 'package:video_playbacker/dtos/video.dart';
+
+import 'edit_video_info_widget.dart';
 
 class CaptureScreen extends StatelessWidget{
   const CaptureScreen({Key? key}): super(key: key);
@@ -37,7 +40,7 @@ class _UrlFormState extends State<UrlForm> {
             appBloc.saveVideoByUrl(_text);
             showDialog(context: context, barrierDismissible: false, builder: (context) {
               return AlertDialog(
-                content: StreamBuilder<LoadingState<void>>(
+                content: StreamBuilder<LoadingState<Video>>(
                   stream: appBloc.onSaveVideoProgress,
                   builder: (context, snapshot){
                     Widget widget = const Text("");
@@ -55,13 +58,18 @@ class _UrlFormState extends State<UrlForm> {
                             LinearProgressIndicator()
                         ],)
                       },
-                      completed: ((content) => {
+                      completed: ((content) {
+                        EditVideoInfoWidget editVideoInfoWidget = EditVideoInfoWidget(video: content);
                         widget = Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             const Text("ダウンロードが完了しました"),
-                            OutlinedButton(onPressed: () {Navigator.pop(context);}, child: const Text('とじる')),
-                        ],)
+                            editVideoInfoWidget,
+                            OutlinedButton(onPressed: () async {
+                              Navigator.pop(context);
+                              await editVideoInfoWidget.saveVideoInfo();
+                            }, child: const Text('保存する')),
+                        ],);
                       }),
                       error: ((_) => {
                         widget = Column(

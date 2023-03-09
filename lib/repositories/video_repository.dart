@@ -99,6 +99,10 @@ class VideoRepository {
     return _createVideoBy(videoInfo);
   }
 
+  Future<void> updateVideo(dto_video.Video video) async {
+    await _database.updateVideoInfo(video.id, video.title, true);
+  }
+
   Future<List<dto_video.Video>> getAllVideos() async {
 
     List<dto_video.Video> video = [];

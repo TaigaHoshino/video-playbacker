@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/dtos/loading_state.dart';
 import 'package:video_playbacker/dtos/video.dart';
+import 'package:video_playbacker/screens/edit_video_info_widget.dart';
 import 'package:video_playbacker/screens/popupmenu_button_builder.dart';
 import 'package:video_playbacker/screens/video_categorization_screen.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
@@ -83,7 +84,31 @@ class WrappedVideoListScreen extends StatelessWidget{
                     final video = content.elementAt(index);
 
                     final popupMenuButtonBuilder = PopupMenuButtonBuilder();
-                    popupMenuButtonBuilder.addMenu(const Text('編集'), () {});
+                    popupMenuButtonBuilder.addMenu(const Text('編集'), () {
+                      showDialog(context: context, builder: (context) {
+                                                      EditVideoInfoWidget editVideoInfoWidget = EditVideoInfoWidget(video: video);
+                                                      return AlertDialog(
+                                                        title: const Text("ビデオ情報を編集"),
+                                                        content: editVideoInfoWidget,
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            child: const Text('キャンセル'),
+                                                            onPressed: () {
+                                                              Navigator.pop(context);
+                                                            },
+                                                          ),
+                                                          TextButton(
+                                                            child: const Text('保存する'),
+                                                            onPressed: () async {
+                                                              Navigator.pop(context);
+                                                              await editVideoInfoWidget.saveVideoInfo();
+                                                              await appBloc.getVideos(videoCategory: videoCategory);
+                                                            },
+                                                          )
+                                                        ],
+                                                      );
+                                                    });
+                    });
                     if(videoCategory != null){
                       popupMenuButtonBuilder.addMenu(const Text('カテゴリから除外'), () {
                         showDialog(context: context, builder: (context) {

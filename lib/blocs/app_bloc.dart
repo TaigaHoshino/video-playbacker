@@ -40,6 +40,10 @@ class AppBloc{
     }
   }
 
+  Future<void> updateVideo(Video video) async {
+    _videoRepository.updateVideo(video);
+  }
+
   // ビデオカテゴリを指定しない場合、全てのビデオを取得する
   Future<void> getVideos({VideoCategory? videoCategory, bool isCategoryExcluded = false}) async{
     if(videoCategory == null) {
