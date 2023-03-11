@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/blocs/app_bloc.dart';
 import 'package:video_playbacker/repositories/video_repository.dart';
@@ -8,6 +9,11 @@ import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'screens/main_screen.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp
+  ]);
+
   final videoPlayerHandler = await AudioService.init(
     builder: () => VideoPlayerHandler(),
     config: const AudioServiceConfig(

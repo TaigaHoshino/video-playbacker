@@ -47,6 +47,7 @@ dependencies:
   audio_session: ^0.1.13
   ffmpeg_kit_flutter: ^4.5.1
   get_it: ^7.2.0
+  chewie: ^1.4.0
   
 
 dev_dependencies:

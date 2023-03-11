@@ -87,6 +87,7 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
     if (_currentMediaItemIndex == _items.length - 1) return;
     _currentMediaItemIndex++;
     await _reinitController();
+    play();
   }
 
   @override
@@ -94,6 +95,7 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
     if (_currentMediaItemIndex == 0) return;
     _currentMediaItemIndex--;
     await _reinitController();
+    play();
   }
 
   Future<void> _reinitController() async {
@@ -110,9 +112,9 @@ class VideoPlayerHandler extends BaseAudioHandler with QueueHandler {
       ),
     );
 
+    await _controller?.initialize();
     _controllerSubject.add(_controller);
     _controller?.setLooping(true);
-    _controller?.initialize();
     _controller?.addListener(_broadcastState);
     Future<void>.delayed(
       const Duration(milliseconds: 100),

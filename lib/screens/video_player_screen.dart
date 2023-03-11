@@ -1,4 +1,6 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:video_playbacker/screens/video_player_handler.dart';
 import 'package:video_player/video_player.dart';
@@ -15,57 +17,64 @@ class VideoPlayerScreen extends StatefulWidget {
 
 class _VideoPlayerPageState extends State<VideoPlayerScreen> {
   final VideoPlayerHandler _videoHandler = GetIt.I<VideoPlayerHandler>();
+  ChewieController? _chewieController;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        OutlinedButton(onPressed: () {
-            _videoHandler.stop();
-            Navigator.pop(context);
-          }, child: Text('検索')),
-        const Text('With remote mp4'),
-        StreamBuilder<VideoPlayerController?>(
-          stream: _videoHandler.controllerStream,
-          builder: (context, snapshot) {
-            final controller = snapshot.data;
-            if (controller == null) return const Text('With remote mp4');
-            return AspectRatio(
-              aspectRatio: controller.value.aspectRatio,
-              child: VideoPlayer(controller),
-            );
-          },
-        ),
-        SizedBox(
-          height: 100.0,
-          child: StreamBuilder<bool>(
-            stream: _videoHandler.playbackState
-                .map((state) => state.playing)
-                .distinct(),
-            builder: (context, snapshot) {
-              final playing = snapshot.data ?? false;
-
-              return GestureDetector(
-                onTap: (playing) ? _videoHandler.pause : _videoHandler.play,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 50),
-                  reverseDuration: const Duration(milliseconds: 200),
-                  child: Container(
-                    color: Colors.black26,
-                    child: Center(
-                      child: Icon(
-                        playing ? Icons.pause : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 100.0,
-                      ),
-                    ),
-                  ),
+    return 
+    Scaffold(
+      appBar: AppBar(
+        title: Text('サンプル'),
+      ),
+      body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: Center(
+              child: 
+                StreamBuilder<VideoPlayerController?>(
+                  stream: _videoHandler.controllerStream,
+                  builder: (context, snapshot) {
+                    final controller = snapshot.data;
+                    if (controller == null) return const Text('With remote mp4');
+                    controller.addListener(() {
+                      if (controller.value.position == controller.value.duration){
+                        _videoHandler.skipToNext();
+                      }
+                    });
+                    ChewieController? previousController = _chewieController;
+                    _chewieController = ChewieController(
+                      videoPlayerController: controller,
+                      aspectRatio: controller.value.aspectRatio,
+                      autoPlay: true,
+                      deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp]);
+                    Future<void>.delayed(
+                      const Duration(milliseconds: 100),
+                      () => previousController?.dispose(),
+                    );
+                    return Chewie(controller: _chewieController!);
+                  },
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children:[
+                IconButton(icon: const Icon(Icons.skip_previous), onPressed: () {_videoHandler.skipToPrevious();}),
+                IconButton(icon: const Icon(Icons.skip_next), onPressed: () {_videoHandler.skipToNext();})]
+            )
+          ]
         ),
-      ],
+      )
     );
+    
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _chewieController?.pause();
+    _chewieController?.dispose();
   }
 }
