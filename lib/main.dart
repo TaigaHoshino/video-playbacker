@@ -17,7 +17,7 @@ Future<void> main() async {
   final videoPlayerHandler = await AudioService.init(
     builder: () => VideoPlayerHandler(),
     config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.tanukis.videoPlayBacker',
+      androidNotificationChannelId: 'com.tanukis.video_playbacker',
       androidNotificationChannelName: 'Audio playback',
       androidStopForegroundOnPause: true,
     )

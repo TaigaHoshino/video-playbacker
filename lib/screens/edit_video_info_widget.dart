@@ -14,7 +14,7 @@ class EditVideoInfoWidget extends StatefulWidget {
   }
 
   @override
-  _EditVideoInfoWidget createState() => _EditVideoInfoWidget();
+  _EditVideoInfoWidgetState createState() => _EditVideoInfoWidgetState();
 
   Future<void> saveVideoInfo() async {
     video.title = _title;
@@ -22,7 +22,7 @@ class EditVideoInfoWidget extends StatefulWidget {
   }
 }
 
-class _EditVideoInfoWidget extends State<EditVideoInfoWidget> {
+class _EditVideoInfoWidgetState extends State<EditVideoInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
@@ -35,5 +35,4 @@ class _EditVideoInfoWidget extends State<EditVideoInfoWidget> {
       ],
     );
   }
-  
 }
